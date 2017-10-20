@@ -196,6 +196,8 @@ inline float SERVER_STORE_AMPS()
 inline void SERVER_STORE_PROCESS_DATA(uint16_t id, float amps, float volts, uint8_t seq, FLOAT_FLOAT ah)
 {
 
+  //amps *= 3.8f;
+
   for (uint8_t i = 0; i < MAX_CLIENTS; i++)
   {
     if (SERVER_STORE_CLIENT_ID[i] == id)

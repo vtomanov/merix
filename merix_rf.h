@@ -36,7 +36,9 @@ RH_NRF24 RF_DRIVER;
 #endif
 
 #define RF_BROADCAST_ADDRESS RH_BROADCAST_ADDRESS
-#define RH_RETRANSMIT_COUNT 20
+#define RH_RETRANSMIT_COUNT 7
+#define RF_HARD_RETRANSMIT_COUNT 7
+#define RF_HARD_RETRANSMIT_DELAY 7
 
 #if not defined(RF_NETWORK_SIMULATION)
 #if defined(MODULE_IS_SERVER)
@@ -114,12 +116,23 @@ inline void RF_SEND_DATA(uint8_t buf[], uint8_t size, uint8_t to)
   }
 
 #if defined(RF_RADIO_HEAD)
-  if (!RF_MANAGER.sendtoWait(buf, size, to))
+  for (uint8_t r = 0; r < RF_HARD_RETRANSMIT_COUNT; r++)
   {
-    LOG64_SET(F("RF: SEND : MESSAGE HAS NOT BEEN RECEIVED : SIZE["));
-    LOG64_SET(size);
-    LOG64_SET(F("]"));
-    LOG64_NEW_LINE;
+    if (!RF_MANAGER.sendtoWait(buf, size, to))
+    {
+      LOG64_SET(F("RF: SEND : MESSAGE HAS NOT BEEN RECEIVED : SIZE["));
+      LOG64_SET(size);
+      LOG64_SET(F("] : HARD RETRANSMIT ["));
+      LOG64_SET(r);
+      LOG64_SET(F("]"));
+      LOG64_NEW_LINE;
+    }
+    else if (to != RF_BROADCAST_ADDRESS)
+    {
+      break;
+    }
+
+    delay(RF_HARD_RETRANSMIT_DELAY);
   }
 #endif
 

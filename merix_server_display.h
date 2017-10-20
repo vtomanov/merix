@@ -79,15 +79,15 @@ float SERVER_DISPLAY_LAST24_PUBLISHED;
 uint32_t SERVER_DISPLAY_ATTACHED_LAST_EXECUTE;
 uint8_t SERVER_DISPLAY_ATTACHED_INDEX;
 
-float SERVER_DISPLAY_REFRESH_AMPS_KALMAN_X;
-float SERVER_DISPLAY_REFRESH_AMPS_KALMAN_P;
-float SERVER_DISPLAY_REFRESH_AMPS_KALMAN_Q;
-float SERVER_DISPLAY_REFRESH_AMPS_KALMAN_R;
-
-float SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_X;
-float SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_P;
-float SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_Q;
-float SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_R;
+//float SERVER_DISPLAY_REFRESH_AMPS_KALMAN_X;
+//float SERVER_DISPLAY_REFRESH_AMPS_KALMAN_P;
+//float SERVER_DISPLAY_REFRESH_AMPS_KALMAN_Q;
+//float SERVER_DISPLAY_REFRESH_AMPS_KALMAN_R;
+//
+//float SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_X;
+//float SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_P;
+//float SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_Q;
+//float SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_R;
 
 
 #if defined(SERVER_DISPLAY_SIMULATION)
@@ -143,15 +143,15 @@ inline void SERVER_DISPLAY_PRINT(uint8_t col, uint8_t row, String s)
 inline void SERVER_DISPLAY_RESET()
 {
 
-  SERVER_DISPLAY_REFRESH_AMPS_KALMAN_X = MERIX_NOT_AVAILABLE;
-  SERVER_DISPLAY_REFRESH_AMPS_KALMAN_P = 0.0f;
-  SERVER_DISPLAY_REFRESH_AMPS_KALMAN_Q = 0.125f;
-  SERVER_DISPLAY_REFRESH_AMPS_KALMAN_R = 4.0f;
-
-  SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_X = MERIX_NOT_AVAILABLE;
-  SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_P = 0.0f;
-  SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_Q = 0.125f;
-  SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_R = 4.0f ;
+//  SERVER_DISPLAY_REFRESH_AMPS_KALMAN_X = MERIX_NOT_AVAILABLE;
+//  SERVER_DISPLAY_REFRESH_AMPS_KALMAN_P = 0.0f;
+//  SERVER_DISPLAY_REFRESH_AMPS_KALMAN_Q = 0.125f;
+//  SERVER_DISPLAY_REFRESH_AMPS_KALMAN_R = 4.0f;
+//
+//  SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_X = MERIX_NOT_AVAILABLE;
+//  SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_P = 0.0f;
+//  SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_Q = 0.125f;
+//  SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_R = 4.0f ;
 
 #if not defined(SERVER_DISPLAY_SIMULATION)
   lcd.clear();
@@ -606,42 +606,42 @@ inline void SERVER_DISPLAY_()
   }
 }
 
-// Kalman filtering
-// if x <= MERIX_NOT_AVAILABLE then assumed not intialized yet
-// based on : http://interactive-matter.eu/blog/2009/12/18/filtering-sensor-data-with-a-kalman-filter/
-inline void SERVER_DISPLAY_KALMAN(float & x, float & p, float & q, float & r, float & in_out)
-{
-  if (x <= MERIX_NOT_AVAILABLE)
-  {
-    x = in_out;
-    return;
-  }
-
-  // peform Kalman
-  p = p + q;
-  float k = p / (p + r);
-  x = x + k * (in_out - x);
-
-  p = (1.0f - k) * p;
-  in_out = x;
-
-}
+//// Kalman filtering
+//// if x <= MERIX_NOT_AVAILABLE then assumed not intialized yet
+//// based on : http://interactive-matter.eu/blog/2009/12/18/filtering-sensor-data-with-a-kalman-filter/
+//inline void SERVER_DISPLAY_KALMAN(float & x, float & p, float & q, float & r, float & in_out)
+//{
+//  if (x <= MERIX_NOT_AVAILABLE)
+//  {
+//    x = in_out;
+//    return;
+//  }
+//
+//  // peform Kalman
+//  p = p + q;
+//  float k = p / (p + r);
+//  x = x + k * (in_out - x);
+//
+//  p = (1.0f - k) * p;
+//  in_out = x;
+//
+//}
 
 
 inline void SERVER_DISPLAY_REFRESH(float amps, float volts, uint8_t percent, float ah_available, float last24[24])
 {
   // perform kalman
-  SERVER_DISPLAY_KALMAN(SERVER_DISPLAY_REFRESH_AMPS_KALMAN_X,
-                        SERVER_DISPLAY_REFRESH_AMPS_KALMAN_P,
-                        SERVER_DISPLAY_REFRESH_AMPS_KALMAN_Q,
-                        SERVER_DISPLAY_REFRESH_AMPS_KALMAN_R,
-                        amps);
-
-  SERVER_DISPLAY_KALMAN(SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_X,
-                        SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_P,
-                        SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_Q,
-                        SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_R,
-                        volts);
+//  SERVER_DISPLAY_KALMAN(SERVER_DISPLAY_REFRESH_AMPS_KALMAN_X,
+//                        SERVER_DISPLAY_REFRESH_AMPS_KALMAN_P,
+//                        SERVER_DISPLAY_REFRESH_AMPS_KALMAN_Q,
+//                        SERVER_DISPLAY_REFRESH_AMPS_KALMAN_R,
+//                        amps);
+//
+//  SERVER_DISPLAY_KALMAN(SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_X,
+//                        SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_P,
+//                        SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_Q,
+//                        SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_R,
+//                        volts);
 
   SERVER_DISPLAY_AMPS = amps;
   SERVER_DISPLAY_VOLTS = volts;
