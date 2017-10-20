@@ -13,6 +13,7 @@ The elements required for the every gauge module are (total ~$25) :
 - 25v Voltage Sensor Module
 - DC-DC LM2596HV Adjustable Step Down Buck Module Voltage Regulator MO
 - high power battery cable and lugs
+- DC Power Pigtail Male 5.5 * 2.1mm Cable Wire Plug 
 (optional enclosure box)
 
 The elements required for the server/display ( total ~$30)
@@ -22,4 +23,5 @@ The elements required for the server/display ( total ~$30)
 - Socket Adapter plate Board For NRF24L01 ( required as connecting directly to 3.3v is not stable)
 - Cables MALE TO FEMALE Jumper GPIO
 - DC-DC LM2596HV Adjustable Step Down Buck Module Voltage Regulator MO
+- DC Power Pigtail Male 5.5 * 2.1mm Cable Wire Plug 
 (optional enclosure box)
