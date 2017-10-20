@@ -15,7 +15,7 @@ The elements required for the every gauge module are (total ~$25) :
 - high power battery cable and lugs
 (optional enclosure box)
 
-The elements required for the server/display
+The elements required for the server/display ( total ~$30)
 - Arduino Mega
 - IIC/I2C 2004 20X4 Character LCD Module Display
 - NRF24L01+PA+LNA SMA Antenna Wireless Transceiver Communication Module 2.4G ( the one with the built-in antenna did not perform well)
