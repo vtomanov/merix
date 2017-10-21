@@ -62,9 +62,19 @@ uint8_t RF_SIMULATION_SIZE;
 uint8_t RF_LAST_RECEIVED_BUF[RF_MAX_MESSAGE_LEN];
 uint8_t RF_LAST_RECEIVED_SIZE;
 
+#if defined(MODULE_IS_CLIENT)
+uint32_t RF_LAST_OUR_SERVER_PACKET_TIME;
+//5 min
+#define RF_MASTER_RESET_TIMEOUT 300000
+#endif
+
 inline void RF_INIT()
 {
   RF_LAST_RECEIVED_SIZE = 0;
+
+#if defined(MODULE_IS_CLIENT)
+  RF_LAST_OUR_SERVER_PACKET_TIME = millis();
+#endif
 
 #if not defined(RF_NETWORK_SIMULATION)
 
@@ -92,6 +102,7 @@ inline void RF_INIT()
 #if defined(RF_NETWORK_SIMULATION)
   RF_SIMULATION_SIZE = 0;
 #endif
+
   LOG64_SET(F("RF: INIT"));
   LOG64_NEW_LINE;
 }
@@ -309,6 +320,15 @@ inline void RF_()
     OPER_PACKET oper_packet;
     uint8_t oper = OPER_PARSE_PACKET(buf, oper_packet);
 
+#if defined(MODULE_IS_CLIENT)
+    if (oper != OPER_NONE)
+    {
+      if (ID_SERVER_ID == oper_packet.base.server_id)
+      {
+        RF_LAST_OUR_SERVER_PACKET_TIME = millis();
+      }
+    }
+#endif
     switch (oper)
     {
       case OPER_NONE :
@@ -396,7 +416,26 @@ inline void RF_()
 
           if (ID_SERVER_ID == oper_packet.reset_request_packet.server_id)
           {
+            LOG64_SET(F("RF: PROCESSING:  EXECUTING RESET"));
+            LOG64_NEW_LINE;
+
             ID_REINIT();
+          }
+          else
+          {
+            if (DO_EXECUTE(millis(), RF_LAST_OUR_SERVER_PACKET_TIME, RF_MASTER_RESET_TIMEOUT))
+            {
+              LOG64_SET(F("RF: PROCESSING:  RESET REQUEST NOT FROM OUR SERVER BUT MASTER RESET IS ENABLED"));
+              LOG64_SET(F("RF: PROCESSING:  EXECUTING RESET"));
+              LOG64_NEW_LINE;
+
+              ID_REINIT();
+            }
+            else
+            {
+              LOG64_SET(F("RF: PROCESSING:  RESET REQUEST NOT FROM OUR SERVER"));
+              LOG64_NEW_LINE;
+            }
           }
 
         }; return;

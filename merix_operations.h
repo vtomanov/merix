@@ -49,46 +49,43 @@ inline bool OPER_MAGIC_CHECK(uint16_t magic)
 #define OPER_DATA 4
 #define OPER_DATA_REQUEST 5
 
-struct OPER_DATA_REQUEST_PACKET
+struct OPER_BASE
 {
   uint8_t seq;
   uint16_t server_id;
+};
+
+struct OPER_DATA_REQUEST_PACKET : OPER_BASE
+{
   uint16_t id;
 };
 
-struct OPER_DATA_PACKET
+struct OPER_DATA_PACKET : OPER_BASE
 {
-  uint8_t seq;
-  uint16_t server_id;
   uint16_t id;
   float amps;
   float volts;
   FLOAT_FLOAT ah; // amps per hour till last data send
 };
 
-struct OPER_HANDSHAKE_PACKET
+struct OPER_HANDSHAKE_PACKET : OPER_BASE
 {
-  uint8_t seq;
-  uint16_t server_id;
   uint16_t id;
   uint8_t include;
   char name[21];
 };
 
-struct OPER_HANDSHAKE_REQUEST_PACKET
+struct OPER_HANDSHAKE_REQUEST_PACKET : OPER_BASE
 {
-  uint8_t seq;
-  uint16_t server_id;
 };
 
-struct OPER_RESET_REQUEST_PACKET
+struct OPER_RESET_REQUEST_PACKET : OPER_BASE
 {
-  uint8_t seq;
-  uint16_t server_id;
 };
 
 union OPER_PACKET
 {
+  OPER_BASE base;
   OPER_HANDSHAKE_PACKET handshake_packet;
   OPER_HANDSHAKE_REQUEST_PACKET handshake_request_packet;
   OPER_RESET_REQUEST_PACKET reset_request_packet;

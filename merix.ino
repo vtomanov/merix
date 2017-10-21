@@ -33,7 +33,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 // PLEASE SET VERSION and REVISION HERE
 
-#define Version_Major_Minor_Revision F("Ver.#0.0.368")
+#define Version_Major_Minor_Revision F("Ver.#0.0.370")
 
 //////////////////////////////////////////////////////////////////////////////////
 // PLEASE SET MODULE NAME e.g. Main Consumers, Bow Thruster, Inverter, Watermaker ( name can be max 18 symbols)
@@ -64,20 +64,21 @@
 // Over what voltage to test for fully charged based on amps consumtion
 #define SERVER_BATTERY_FULLY_CHARGED_TEST_VOLTAGE 14.00f
 
-
 #define CLIENT_MIN_CONSUMPTION  0.5f
 
 #endif
-
-
-//////////////////////////////////////////////////////////////////////////////////
-// GLOBALS
-#define MAX_CLIENTS 10
 
 ///////////////////////////////////////////////////////////////////////////////////
 // LOG constants
 #define LOG64_ENABLED
 //#define EEPROM_LOG64_ENABLED
+
+
+// <END> SETTINGS THAT NEED TO BE SET BEFORE FINAL COMPILE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+//////////////////////////////////////////////////////////////////////////////////
+// GLOBALS
+#define MAX_CLIENTS 10
 
 #include <Log64.h>
 
@@ -164,6 +165,7 @@ inline void MONITOR_DOWN()
 #include "merix_client_sensors.h"
 #include "merix_rf.h"
 #include "merix_server_reset.h"
+#include "merix_server_button.h"
 
 
 
@@ -187,6 +189,8 @@ void setup()
 #endif
 
 #if defined(MODULE_IS_SERVER)
+  //Server button
+  SERVER_BUTTON_INIT();
   //Server display
   SERVER_DISPLAY_INIT();
   // Server state
@@ -302,6 +306,8 @@ void loop()
   SERVER_STORE_();
 
   SERVER_DISPLAY_();
+
+  SERVER_BUTTON_();
 
 #endif
 

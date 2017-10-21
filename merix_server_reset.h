@@ -14,6 +14,10 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Call when reset button is pressed
+//
+// There are two type of reset supported - one is simple reset e.g. the client is already bound with the server sending reset
+// and master reset - e.g. the client is bounded with different server. The master reset is enabled only if the client has not received a valid message 
+// for 5 min from the server that it is bounded to. 
 
 #if defined(MODULE_IS_SERVER)
 

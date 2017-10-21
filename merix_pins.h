@@ -23,6 +23,8 @@
 #define RF_CE_PIN 8
 #define RF_CSN_PIN 53
 
+#define SERVER_BUTTON_PIN 12
+
 #endif
 
 #if defined(MODULE_IS_CLIENT)
