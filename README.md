@@ -1,6 +1,46 @@
 # merix
 Advance battery monitoring system for boats , RV etc. 
 
+
+Brief Capability Description:
+
+- up to 9 measuring point ( easy extensible with just a configuration change if needed) 
+- every measuring point can be included or excluded in the current consumption, current amps and volts calculation - for example if you have let say  one measuring point just after the battery bank and somewhere further down a measuring point which will measure the watermaker consumption - you do not want the watermaker to be included in the current calculations as it is already part of the first measuring point, but in the same time you do want to know how much the watermaker consumes and how much from the total consumption it is accountable for.
+- measuring point communicate with the main/display module using radio/wirelessly
+- calculate properly the in and out amps and adjust based on the battery voltage when appropriated
+- calculate/adjust dynamically the loss coefficient as to get 1ah to discharge you actually need to charge more then 1ah - and the loss increases when batteries become older
+- show the consumption for the last 24h
+- shows how much time is left until the batteries are down to 50%
+- shows how long it will take to charge the batteries to 90% 
+- shows current AH available in the batteries
+- shows charge state in %
+- shows amps, volts and for how much of the discharge or charge every measuring point is accountable for
+- screen is able to switch off the back light to prevent the annoying strong light source during sleep in the saloon
+- able to initialize and connect new measuring points ( handshaking and binding with all available measuring points)
+- reset of all measuring points and enables them for new binding with new main module or etc.
+ 
+
+What The Display Show:
+
+First line:
+
+- average voltage across all measuring points
+- total resulting current ( sum across all measuring point)
+- proper calculation of  battery bank state of charge ( with  correction when volts are over 14 and no consumption or charge, when no consumption or charge for 1min also charge state correction based on voltage) and when charge state is corrected - auto calculation of lost coefficient while charging - e.g. when you charge there is a loss e.g. to have 1ah to discharge in average you need to charge 1.25ah)
+
+Second line - flips between ( every 5 sec - configurable) :
+
+- total AH available , and total consumption for the last 24h
+and
+- time to discharge to 50% ( if discharging) or time to charge to 90% if charging - assuming charge or discharge current continue to be the same ( the charging calculation is a proper one taking in account that after 75% charge the batteries gradually start accepting lower and lower current) 
+
+Third and Fourth line  are related to  cycling between all measuring points
+
+Third line - name of measuring point and :<sequence> of the update received from the sensor
+Fourth - current voltage at this measuring point,  current amps at this measuring point, how much consumption this measuring point is accountable for in % from day one.
+
+ELEMENTS:
+
 The system is based on Arduino Uno for monitoring gauges and Arduino Mega for the server/display side.
 
 The elements required for the every gauge module are (total ~$25) :
