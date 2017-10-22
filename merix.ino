@@ -33,7 +33,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 // PLEASE SET VERSION and REVISION HERE
 
-#define Version_Major_Minor_Revision F("Ver.#0.0.370")
+#define Version_Major_Minor_Revision F("Ver.#0.0.371")
 
 //////////////////////////////////////////////////////////////////////////////////
 // PLEASE SET MODULE NAME e.g. Main Consumers, Bow Thruster, Inverter, Watermaker ( name can be max 18 symbols)
