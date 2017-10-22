@@ -107,8 +107,9 @@ inline void RF_INIT()
   LOG64_NEW_LINE;
 }
 
-inline void RF_SEND_DATA(uint8_t buf[], uint8_t size, uint8_t to)
+inline bool RF_SEND_DATA(uint8_t buf[], uint8_t size, uint8_t to)
 {
+  bool ret = false;
 
 #if not defined(RF_NETWORK_SIMULATION)
 
@@ -140,7 +141,12 @@ inline void RF_SEND_DATA(uint8_t buf[], uint8_t size, uint8_t to)
     }
     else if (to != RF_BROADCAST_ADDRESS)
     {
+      ret = true;
       break;
+    }
+    else
+    {
+      ret = true;
     }
 
     delay(RF_HARD_RETRANSMIT_DELAY);
@@ -161,8 +167,11 @@ inline void RF_SEND_DATA(uint8_t buf[], uint8_t size, uint8_t to)
 #if defined(RF_NETWORK_SIMULATION)
   RF_SIMULATION_SIZE = size;
   memcpy(RF_SIMULATION_BUF, buf, size);
+
+  ret = true;
 #endif
 
+  return ret;
 }
 
 inline bool RF_CMP(uint8_t buf[], uint8_t & size, uint8_t buf_tmp[], uint8_t & size_tmp)
@@ -294,6 +303,167 @@ inline void RF_SEND_RESET_REQUEST()
   RF_SEND_DATA(out_buf, out_size, RF_BROADCAST_ADDRESS);
 }
 
+
+inline void RF_PROCESS(OPER_PACKET  & oper_packet, uint8_t oper)
+{
+#if defined(MODULE_IS_CLIENT)
+  if (oper != OPER_NONE)
+  {
+    if (ID_SERVER_ID == oper_packet.base.server_id)
+    {
+      RF_LAST_OUR_SERVER_PACKET_TIME = millis();
+    }
+  }
+#endif
+  switch (oper)
+  {
+    case OPER_NONE :
+      {
+        LOG64_SET(F("RF: PROCESSING:  OPER_NONE"));
+        LOG64_NEW_LINE;
+      }; return;
+
+#if defined(MODULE_IS_SERVER)
+    case OPER_HANDSHAKE :
+      {
+        LOG64_SET(F("RF: PROCESSING:  OPER_HANDSHAKE"));
+        LOG64_NEW_LINE;
+
+        if (ID_SERVER_ID != oper_packet.handshake_packet.server_id)
+        {
+          LOG64_SET(F("RF: PROCESSING:  OPER_HANDSHAKE: HANDSHAKE NOT TO US"));
+          LOG64_NEW_LINE;
+
+          return;
+        }
+
+        for (uint8_t i = 0; i < MAX_CLIENTS; i++)
+        {
+          if (SERVER_STORE_CLIENT_ID[i] == 0xFFFF)
+          {
+            SERVER_STORE_CLIENT_ID[i] = oper_packet.handshake_packet.id;
+            SERVER_STORE_CLIENT_INCLUDE[i] = oper_packet.handshake_packet.include;
+            strcpy(SERVER_STORE_CLIENT_NAME[i], oper_packet.handshake_packet.name);
+
+            break;
+          }
+        }
+
+      }; return;
+    case OPER_DATA :
+      {
+        LOG64_SET(F("RF: PROCESSING:  OPER_DATA"));
+        LOG64_NEW_LINE;
+
+        if (ID_SERVER_ID != oper_packet.data_packet.server_id)
+        {
+          LOG64_SET(F("RF: PROCESSING:  OPER_DATA: DATA NOT TO US"));
+          LOG64_NEW_LINE;
+
+          return;
+        }
+        SERVER_STORE_PROCESS_DATA(oper_packet.data_packet.id, oper_packet.data_packet.amps, oper_packet.data_packet.volts, oper_packet.data_packet.seq, oper_packet.data_packet.ah);
+      }; return;
+#endif
+
+#if defined(MODULE_IS_CLIENT)
+    case OPER_HANDSHAKE_REQUEST :
+      {
+        LOG64_SET(F("RF: PROCESSING:  OPER_HANDSHAKE_REQUEST"));
+        LOG64_NEW_LINE;
+
+        if (ID_SERVER_ID == 0xFFFF)
+        {
+          ID_SET_SERVER_ID(oper_packet.handshake_request_packet.server_id);
+        }
+
+        if (ID_SERVER_ID != oper_packet.handshake_request_packet.server_id)
+        {
+          LOG64_SET(F("RF: PROCESSING:  OPER_HANDSHAKE_REQUEST : NOT FROM OUR SERVER"));
+          LOG64_NEW_LINE;
+
+          return;
+        }
+
+        delay(ID_DELAY);
+
+        uint8_t out_buf[RF_MAX_MESSAGE_LEN];
+        uint8_t out_size = RF_MAX_MESSAGE_LEN;
+
+        ID_GET_HANDSHAKE_PACKET(out_buf, out_size);
+
+        RF_SEND_DATA(out_buf, out_size, 0);
+
+      }; return;
+    case OPER_RESET_REQUEST :
+      {
+        LOG64_SET(F("RF: PROCESSING:  OPER_RESET_REQUEST"));
+        LOG64_NEW_LINE;
+
+        if (ID_SERVER_ID == oper_packet.reset_request_packet.server_id)
+        {
+          LOG64_SET(F("RF: PROCESSING:  EXECUTING RESET"));
+          LOG64_NEW_LINE;
+
+          ID_REINIT();
+        }
+        else
+        {
+          if (DO_EXECUTE(millis(), RF_LAST_OUR_SERVER_PACKET_TIME, RF_MASTER_RESET_TIMEOUT))
+          {
+            LOG64_SET(F("RF: PROCESSING:  RESET REQUEST NOT FROM OUR SERVER BUT MASTER RESET IS ENABLED"));
+            LOG64_SET(F("RF: PROCESSING:  EXECUTING RESET"));
+            LOG64_NEW_LINE;
+
+            ID_REINIT();
+          }
+          else
+          {
+            LOG64_SET(F("RF: PROCESSING:  RESET REQUEST NOT FROM OUR SERVER"));
+            LOG64_NEW_LINE;
+          }
+        }
+
+      }; return;
+    case OPER_DATA_REQUEST :
+      {
+        LOG64_SET(F("RF: PROCESSING:  OPER_DATA_REQUEST"));
+        LOG64_NEW_LINE;
+
+        if (ID_SERVER_ID != oper_packet.data_request_packet.server_id)
+        {
+          LOG64_SET(F("RF: PROCESSING:  OPER_DATA_REQUEST : NOT FROM OUR SERVER"));
+          LOG64_NEW_LINE;
+
+          return;
+        }
+
+        if (ID_ID != oper_packet.data_request_packet.id)
+        {
+          LOG64_SET(F("RF: PROCESSING:  OPER_DATA_REQUEST : NOT FOR US"));
+          LOG64_NEW_LINE;
+
+          return;
+        }
+
+        uint8_t out_buf[RF_MAX_MESSAGE_LEN];
+        uint8_t out_size = RF_MAX_MESSAGE_LEN;
+
+        float amps;
+        float volts;
+        FLOAT_FLOAT ah;
+
+        CLIENT_SENSORS_GET(amps, volts, ah);
+
+        ID_GET_DATA_PACKET(out_buf, out_size, amps, volts, ah);
+
+        RF_SEND_DATA(out_buf, out_size, 0);
+
+      }; return;
+#endif
+  }
+}
+
 inline void RF_SEND_DATA_REQUEST(uint16_t id, uint8_t to)
 {
   uint8_t out_buf[RF_MAX_MESSAGE_LEN];
@@ -301,8 +471,27 @@ inline void RF_SEND_DATA_REQUEST(uint16_t id, uint8_t to)
 
   ID_GET_DATA_REQUEST_PACKET(out_buf, out_size, id);
 
-  RF_SEND_DATA(out_buf, out_size, to);
+  if (!RF_SEND_DATA(out_buf, out_size, to))
+  {
+    LOG64_SET(F("RF: DATA FREQUEST FAILED TO BE RECEIVED : SIMULATED WITH NULL VALUES"));
+    LOG64_NEW_LINE;
+
+    uint8_t out_buf[RF_MAX_MESSAGE_LEN];
+    uint8_t out_size = RF_MAX_MESSAGE_LEN;
+
+    float amps = MERIX_NOT_AVAILABLE;
+    float volts = MERIX_NOT_AVAILABLE;
+    FLOAT_FLOAT ah(0.0f);
+
+    ID_GET_DATA_PACKET(out_buf, out_size, amps, volts, ah, id);
+
+    OPER_PACKET oper_packet;
+    uint8_t oper = OPER_PARSE_PACKET(out_buf, oper_packet);
+
+    RF_PROCESS(oper_packet, oper);
+  }
 }
+
 
 inline void RF_()
 {
@@ -320,162 +509,7 @@ inline void RF_()
     OPER_PACKET oper_packet;
     uint8_t oper = OPER_PARSE_PACKET(buf, oper_packet);
 
-#if defined(MODULE_IS_CLIENT)
-    if (oper != OPER_NONE)
-    {
-      if (ID_SERVER_ID == oper_packet.base.server_id)
-      {
-        RF_LAST_OUR_SERVER_PACKET_TIME = millis();
-      }
-    }
-#endif
-    switch (oper)
-    {
-      case OPER_NONE :
-        {
-          LOG64_SET(F("RF: PROCESSING:  OPER_NONE"));
-          LOG64_NEW_LINE;
-        }; return;
-
-#if defined(MODULE_IS_SERVER)
-      case OPER_HANDSHAKE :
-        {
-          LOG64_SET(F("RF: PROCESSING:  OPER_HANDSHAKE"));
-          LOG64_NEW_LINE;
-
-          if (ID_SERVER_ID != oper_packet.handshake_packet.server_id)
-          {
-            LOG64_SET(F("RF: PROCESSING:  OPER_HANDSHAKE: HANDSHAKE NOT TO US"));
-            LOG64_NEW_LINE;
-
-            return;
-          }
-
-          for (uint8_t i = 0; i < MAX_CLIENTS; i++)
-          {
-            if (SERVER_STORE_CLIENT_ID[i] == 0xFFFF)
-            {
-              SERVER_STORE_CLIENT_ID[i] = oper_packet.handshake_packet.id;
-              SERVER_STORE_CLIENT_INCLUDE[i] = oper_packet.handshake_packet.include;
-              strcpy(SERVER_STORE_CLIENT_NAME[i], oper_packet.handshake_packet.name);
-
-              break;
-            }
-          }
-
-        }; return;
-      case OPER_DATA :
-        {
-          LOG64_SET(F("RF: PROCESSING:  OPER_DATA"));
-          LOG64_NEW_LINE;
-
-          if (ID_SERVER_ID != oper_packet.data_packet.server_id)
-          {
-            LOG64_SET(F("RF: PROCESSING:  OPER_DATA: DATA NOT TO US"));
-            LOG64_NEW_LINE;
-
-            return;
-          }
-          SERVER_STORE_PROCESS_DATA(oper_packet.data_packet.id, oper_packet.data_packet.amps, oper_packet.data_packet.volts, oper_packet.data_packet.seq, oper_packet.data_packet.ah);
-        }; return;
-#endif
-
-#if defined(MODULE_IS_CLIENT)
-      case OPER_HANDSHAKE_REQUEST :
-        {
-          LOG64_SET(F("RF: PROCESSING:  OPER_HANDSHAKE_REQUEST"));
-          LOG64_NEW_LINE;
-
-          if (ID_SERVER_ID == 0xFFFF)
-          {
-            ID_SET_SERVER_ID(oper_packet.handshake_request_packet.server_id);
-          }
-
-          if (ID_SERVER_ID != oper_packet.handshake_request_packet.server_id)
-          {
-            LOG64_SET(F("RF: PROCESSING:  OPER_HANDSHAKE_REQUEST : NOT FROM OUR SERVER"));
-            LOG64_NEW_LINE;
-
-            return;
-          }
-
-          delay(ID_DELAY);
-
-          uint8_t out_buf[RF_MAX_MESSAGE_LEN];
-          uint8_t out_size = RF_MAX_MESSAGE_LEN;
-
-          ID_GET_HANDSHAKE_PACKET(out_buf, out_size);
-
-          RF_SEND_DATA(out_buf, out_size, 0);
-
-        }; return;
-      case OPER_RESET_REQUEST :
-        {
-          LOG64_SET(F("RF: PROCESSING:  OPER_RESET_REQUEST"));
-          LOG64_NEW_LINE;
-
-          if (ID_SERVER_ID == oper_packet.reset_request_packet.server_id)
-          {
-            LOG64_SET(F("RF: PROCESSING:  EXECUTING RESET"));
-            LOG64_NEW_LINE;
-
-            ID_REINIT();
-          }
-          else
-          {
-            if (DO_EXECUTE(millis(), RF_LAST_OUR_SERVER_PACKET_TIME, RF_MASTER_RESET_TIMEOUT))
-            {
-              LOG64_SET(F("RF: PROCESSING:  RESET REQUEST NOT FROM OUR SERVER BUT MASTER RESET IS ENABLED"));
-              LOG64_SET(F("RF: PROCESSING:  EXECUTING RESET"));
-              LOG64_NEW_LINE;
-
-              ID_REINIT();
-            }
-            else
-            {
-              LOG64_SET(F("RF: PROCESSING:  RESET REQUEST NOT FROM OUR SERVER"));
-              LOG64_NEW_LINE;
-            }
-          }
-
-        }; return;
-      case OPER_DATA_REQUEST :
-        {
-          LOG64_SET(F("RF: PROCESSING:  OPER_DATA_REQUEST"));
-          LOG64_NEW_LINE;
-
-          if (ID_SERVER_ID != oper_packet.data_request_packet.server_id)
-          {
-            LOG64_SET(F("RF: PROCESSING:  OPER_DATA_REQUEST : NOT FROM OUR SERVER"));
-            LOG64_NEW_LINE;
-
-            return;
-          }
-
-          if (ID_ID != oper_packet.data_request_packet.id)
-          {
-            LOG64_SET(F("RF: PROCESSING:  OPER_DATA_REQUEST : NOT FOR US"));
-            LOG64_NEW_LINE;
-
-            return;
-          }
-
-          uint8_t out_buf[RF_MAX_MESSAGE_LEN];
-          uint8_t out_size = RF_MAX_MESSAGE_LEN;
-
-          float amps;
-          float volts;
-          FLOAT_FLOAT ah;
-
-          CLIENT_SENSORS_GET(amps, volts, ah);
-
-          ID_GET_DATA_PACKET(out_buf, out_size, amps, volts, ah);
-
-          RF_SEND_DATA(out_buf, out_size, 0);
-
-        }; return;
-#endif
-    }
+    RF_PROCESS(oper_packet, oper);
   }
 }
 

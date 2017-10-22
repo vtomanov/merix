@@ -110,7 +110,7 @@ inline float SERVER_STORE_()
 
   if (DO_EXECUTE(millis(), SERVER_STORE_LAST1_EXECUTE, SERVER_STORE_LAST1_TIMEOUT))
   {
-    
+
     //LOG64_SET(F("STORE: CALC 24: TOTAL["));
     //LOG64_SET(SERVER_STORE_TOTAL_DISCHARGED.GET());
     //LOG64_SET(F("] LAST1["));
@@ -145,7 +145,7 @@ inline float SERVER_STORE_VOLTS()
   {
     if (SERVER_STORE_CLIENT_ID[i] != 0xFFFF)
     {
-      if (SERVER_STORE_CLIENT_VOLTS[i] >= MERIX_NOT_AVAILABLE)
+      if (SERVER_STORE_CLIENT_VOLTS[i] > MERIX_NOT_AVAILABLE)
       {
         if (SERVER_STORE_CLIENT_INCLUDE[i] > 0)
         {
@@ -155,7 +155,7 @@ inline float SERVER_STORE_VOLTS()
       }
     }
   }
-  
+
   if (count > 0)
   {
     return (ret / ((float)count));
@@ -173,7 +173,7 @@ inline float SERVER_STORE_AMPS()
   {
     if (SERVER_STORE_CLIENT_ID[i] != 0xFFFF)
     {
-      if (SERVER_STORE_CLIENT_AMPS[i] >= MERIX_NOT_AVAILABLE)
+      if (SERVER_STORE_CLIENT_AMPS[i] > MERIX_NOT_AVAILABLE)
       {
         if (SERVER_STORE_CLIENT_INCLUDE[i] > 0)
         {
@@ -184,7 +184,7 @@ inline float SERVER_STORE_AMPS()
       }
     }
   }
-  
+
   if (count > 0)
   {
     return ret;
@@ -402,20 +402,20 @@ inline void SERVER_STORE_PROCESS_DATA(uint16_t id, float amps, float volts, uint
         }
 
 
-        //LOG64_SET(F("SERVER_STORE: PROCESS_DATA: AMPS["));
-        //LOG64_SET(server_amps);
-        //LOG64_SET(F("]: VOLTS["));
-        //LOG64_SET(server_volts);
-        //LOG64_SET(F("] AH["));
-        //LOG64_SET(String(ah.GET(), 12));
-        //LOG64_SET(String(ah.GET_LO(), 12));
-        //LOG64_SET(F("] AH_TOTAL["));
-        //LOG64_SET(String(SERVER_STORE_AH.GET(), 12));
-        //LOG64_SET(String(SERVER_STORE_AH.GET_LO(), 12));
-        //LOG64_SET(F("] NEW_COEF["));
-        //LOG64_SET(SERVER_STORE_DATA_LOSS_COEF);
-        //LOG64_SET(F("]"));
-        //LOG64_NEW_LINE;
+        //        LOG64_SET(F("SERVER_STORE: PROCESS_DATA : AMPS["));
+        //        LOG64_SET(server_amps);
+        //        LOG64_SET(F("]: VOLTS["));
+        //        LOG64_SET(server_volts);
+        //        LOG64_SET(F("] AH["));
+        //        LOG64_SET(String(ah.GET(), 12));
+        //        LOG64_SET(String(ah.GET_LO(), 12));
+        //        LOG64_SET(F("] AH_TOTAL["));
+        //        LOG64_SET(String(SERVER_STORE_AH.GET(), 12));
+        //        LOG64_SET(String(SERVER_STORE_AH.GET_LO(), 12));
+        //        LOG64_SET(F("] NEW_COEF["));
+        //        LOG64_SET(SERVER_STORE_DATA_LOSS_COEF);
+        //        LOG64_SET(F("]"));
+        //        LOG64_NEW_LINE;
 
         SERVER_DISPLAY_REFRESH(server_amps, server_volts, (uint8_t)round((SERVER_STORE_AH.GET() / SERVER_BATTERY_CAPACITY) * 100.0f), SERVER_STORE_AH.GET(), SERVER_STORE_LAST24);
       }

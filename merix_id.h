@@ -100,7 +100,7 @@ inline void ID_INIT()
   LOG64_NEW_LINE;
 }
 
-inline void ID_GET_DATA_PACKET(uint8_t buf[], uint8_t & size, float amps, float volts, FLOAT_FLOAT ah)
+inline void ID_GET_DATA_PACKET(uint8_t buf[], uint8_t & size, float amps, float volts, FLOAT_FLOAT ah, uint16_t ID = ID_ID)
 {
   size = 0;
 
@@ -112,8 +112,8 @@ inline void ID_GET_DATA_PACKET(uint8_t buf[], uint8_t & size, float amps, float 
   buf[size++] = ((uint8_t*)&ID_SERVER_ID)[0];
   buf[size++] = ((uint8_t*)&ID_SERVER_ID)[1];
 
-  buf[size++] = ((uint8_t*)&ID_ID)[0];
-  buf[size++] = ((uint8_t*)&ID_ID)[1];
+  buf[size++] = ((uint8_t*)&ID)[0];
+  buf[size++] = ((uint8_t*)&ID)[1];
 
   memcpy((void*) & buf[size], &amps, sizeof(float));
   size += sizeof(float);

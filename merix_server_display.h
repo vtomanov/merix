@@ -145,15 +145,15 @@ inline void SERVER_DISPLAY_PRINT(uint8_t col, uint8_t row, String s)
 inline void SERVER_DISPLAY_RESET()
 {
 
-//  SERVER_DISPLAY_REFRESH_AMPS_KALMAN_X = MERIX_NOT_AVAILABLE;
-//  SERVER_DISPLAY_REFRESH_AMPS_KALMAN_P = 0.0f;
-//  SERVER_DISPLAY_REFRESH_AMPS_KALMAN_Q = 0.125f;
-//  SERVER_DISPLAY_REFRESH_AMPS_KALMAN_R = 4.0f;
-//
-//  SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_X = MERIX_NOT_AVAILABLE;
-//  SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_P = 0.0f;
-//  SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_Q = 0.125f;
-//  SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_R = 4.0f ;
+  //  SERVER_DISPLAY_REFRESH_AMPS_KALMAN_X = MERIX_NOT_AVAILABLE;
+  //  SERVER_DISPLAY_REFRESH_AMPS_KALMAN_P = 0.0f;
+  //  SERVER_DISPLAY_REFRESH_AMPS_KALMAN_Q = 0.125f;
+  //  SERVER_DISPLAY_REFRESH_AMPS_KALMAN_R = 4.0f;
+  //
+  //  SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_X = MERIX_NOT_AVAILABLE;
+  //  SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_P = 0.0f;
+  //  SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_Q = 0.125f;
+  //  SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_R = 4.0f ;
 
 #if not defined(SERVER_DISPLAY_SIMULATION)
   lcd.clear();
@@ -363,7 +363,7 @@ inline void SERVER_DISPLAY_()
     {
       SERVER_DISPLAY_VOLTS_PUBLISHED = SERVER_DISPLAY_VOLTS;
 
-      String v = String((SERVER_DISPLAY_VOLTS <= 0) ? 0.0f : SERVER_DISPLAY_VOLTS , 2);
+      String v = (SERVER_DISPLAY_VOLTS <= 0) ? String(F("--.--")) : String(SERVER_DISPLAY_VOLTS , 2);
       v += 'V';
       for (; v.length() < 6; )
       {
@@ -383,7 +383,7 @@ inline void SERVER_DISPLAY_()
     {
       SERVER_DISPLAY_AMPS_PUBLISHED = SERVER_DISPLAY_AMPS;
 
-      String a = String((SERVER_DISPLAY_AMPS <= MERIX_NOT_AVAILABLE) ? 0.0f : SERVER_DISPLAY_AMPS , 2);
+      String a = (SERVER_DISPLAY_AMPS <= MERIX_NOT_AVAILABLE) ? String(F("---.--")) : String(SERVER_DISPLAY_AMPS , 2);
       a += 'A';
       for (; a.length() < 9; )
       {
@@ -399,11 +399,11 @@ inline void SERVER_DISPLAY_()
 #endif
     }
 
-    if (SERVER_DISPLAY_PERCENT != SERVER_DISPLAY_PERCENT_PUBLISHED)
+    // need to be displayed always as to recover from gauge switched off
     {
       SERVER_DISPLAY_PERCENT_PUBLISHED = SERVER_DISPLAY_PERCENT;
 
-      String p = String(SERVER_DISPLAY_PERCENT);
+      String p = ((SERVER_DISPLAY_VOLTS <= 0) || (SERVER_DISPLAY_AMPS <= MERIX_NOT_AVAILABLE)) ? String(F("---")) :   String(SERVER_DISPLAY_PERCENT);
       p += '%';
       for (; p.length() < 5; )
       {
@@ -527,7 +527,6 @@ inline void SERVER_DISPLAY_()
     //12.45V -324.14A 100%
 
     uint8_t index_found = 255;
-
     if (do_data)
     {
 
@@ -557,8 +556,6 @@ inline void SERVER_DISPLAY_()
         }
       }
     }
-
-    //    LOG64_SET("!!!!!!");
     //    LOG64_SET(index_found);
     //    LOG64_NEW_LINE;
 
@@ -570,57 +567,55 @@ inline void SERVER_DISPLAY_()
         SERVER_DISPLAY_INDEX_PUBLISHED = SERVER_DISPLAY_INDEX;
       }
 
-      if ((SERVER_STORE_CLIENT_VOLTS[SERVER_DISPLAY_INDEX] != MERIX_NOT_AVAILABLE) && (SERVER_STORE_CLIENT_AMPS[SERVER_DISPLAY_INDEX] != MERIX_NOT_AVAILABLE))
+      String n = String(SERVER_STORE_CLIENT_NAME[SERVER_DISPLAY_INDEX]);
+      for (; n.length() < 18; )
       {
-        String n = String(SERVER_STORE_CLIENT_NAME[SERVER_DISPLAY_INDEX]);
-        for (; n.length() < 18; )
-        {
-          n += ' ';
-        }
-        n += ':';
-        n += (SERVER_STORE_CLIENT_SEQ[SERVER_DISPLAY_INDEX] % 10);
-        SERVER_DISPLAY_PRINT(0, 2, n);
+        n += ' ';
+      }
+      n += ':';
+      n += (SERVER_STORE_CLIENT_SEQ[SERVER_DISPLAY_INDEX] % 10);
+      SERVER_DISPLAY_PRINT(0, 2, n);
 
-        String v = String(SERVER_STORE_CLIENT_VOLTS[SERVER_DISPLAY_INDEX] , 2);
-        v += 'V';
-        for (; v.length() < 6; )
-        {
-          v = ' ' + v;
-        }
-        SERVER_DISPLAY_PRINT(0, 3, v);
+      String v = (SERVER_STORE_CLIENT_VOLTS[SERVER_DISPLAY_INDEX] <= 0) ? String(F("--.--")) : String(SERVER_STORE_CLIENT_VOLTS[SERVER_DISPLAY_INDEX] , 2);
+      v += 'V';
+      for (; v.length() < 6; )
+      {
+        v = ' ' + v;
+      }
+      SERVER_DISPLAY_PRINT(0, 3, v);
 
-        String a = String(SERVER_STORE_CLIENT_AMPS[SERVER_DISPLAY_INDEX] , 2);
-        a += 'A';
-        for (; a.length() < 9; )
-        {
-          a = ' ' + a;
-        }
-        SERVER_DISPLAY_PRINT(6, 3, a);
+      String a = (SERVER_STORE_CLIENT_AMPS[SERVER_DISPLAY_INDEX] <= MERIX_NOT_AVAILABLE) ? String(F("---.--")) : String(SERVER_STORE_CLIENT_AMPS[SERVER_DISPLAY_INDEX] , 2);
+      a += 'A';
+      for (; a.length() < 9; )
+      {
+        a = ' ' + a;
+      }
+      SERVER_DISPLAY_PRINT(6, 3, a);
 
-        FLOAT_FLOAT percent_total = SERVER_STORE_TOTAL_PER_CLIENT[SERVER_DISPLAY_INDEX];
-        if ((SERVER_STORE_TOTAL_DISCHARGED.GET() == 0.0f) && (SERVER_STORE_TOTAL_DISCHARGED.GET_LO() == 0.0f))
-        {
-          percent_total = FLOAT_FLOAT(100.0f);
-        }
-        else
-        {
-          percent_total.DIV(SERVER_STORE_TOTAL_DISCHARGED);
-          percent_total.MUL(FLOAT_FLOAT(100.0f));
-        }
+      FLOAT_FLOAT percent_total = SERVER_STORE_TOTAL_PER_CLIENT[SERVER_DISPLAY_INDEX];
+      if ((SERVER_STORE_TOTAL_DISCHARGED.GET() == 0.0f) && (SERVER_STORE_TOTAL_DISCHARGED.GET_LO() == 0.0f))
+      {
+        percent_total = FLOAT_FLOAT(100.0f);
+      }
+      else
+      {
+        percent_total.DIV(SERVER_STORE_TOTAL_DISCHARGED);
+        percent_total.MUL(FLOAT_FLOAT(100.0f));
+      }
 
-        String p = String((abs(percent_total.GET()) > 100.0f) ? (uint8_t)100 : (uint8_t)round(abs(percent_total.GET())));
-        p += '%';
-        for (; p.length() < 5; )
-        {
-          p = ' ' + p;
-        }
+      String p = String((abs(percent_total.GET()) > 100.0f) ? (uint8_t)100 : (uint8_t)round(abs(percent_total.GET())));
+      p += '%';
+      for (; p.length() < 5; )
+      {
+        p = ' ' + p;
+      }
 
-        SERVER_DISPLAY_PRINT(15, 3, p);
+      SERVER_DISPLAY_PRINT(15, 3, p);
 
 #if defined(SERVER_DISPLAY_SIMULATION)
-        SERVER_DISPLAY_PRINT_FINISH();
+      SERVER_DISPLAY_PRINT_FINISH();
 #endif
-      }
+
     }
   }
 }
@@ -650,17 +645,17 @@ inline void SERVER_DISPLAY_()
 inline void SERVER_DISPLAY_REFRESH(float amps, float volts, uint8_t percent, float ah_available, float last24[24])
 {
   // perform kalman
-//  SERVER_DISPLAY_KALMAN(SERVER_DISPLAY_REFRESH_AMPS_KALMAN_X,
-//                        SERVER_DISPLAY_REFRESH_AMPS_KALMAN_P,
-//                        SERVER_DISPLAY_REFRESH_AMPS_KALMAN_Q,
-//                        SERVER_DISPLAY_REFRESH_AMPS_KALMAN_R,
-//                        amps);
-//
-//  SERVER_DISPLAY_KALMAN(SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_X,
-//                        SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_P,
-//                        SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_Q,
-//                        SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_R,
-//                        volts);
+  //  SERVER_DISPLAY_KALMAN(SERVER_DISPLAY_REFRESH_AMPS_KALMAN_X,
+  //                        SERVER_DISPLAY_REFRESH_AMPS_KALMAN_P,
+  //                        SERVER_DISPLAY_REFRESH_AMPS_KALMAN_Q,
+  //                        SERVER_DISPLAY_REFRESH_AMPS_KALMAN_R,
+  //                        amps);
+  //
+  //  SERVER_DISPLAY_KALMAN(SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_X,
+  //                        SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_P,
+  //                        SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_Q,
+  //                        SERVER_DISPLAY_REFRESH_VOLTS_KALMAN_R,
+  //                        volts);
 
   SERVER_DISPLAY_AMPS = amps;
   SERVER_DISPLAY_VOLTS = volts;
@@ -676,15 +671,16 @@ inline void SERVER_DISPLAY_REFRESH(float amps, float volts, uint8_t percent, flo
     SERVER_DISPLAY_TIME_TYPE = 1;
   }
 
-  //LOG64_SET(F("DISPLAY: REFRESH: AMPS["));
-  //LOG64_SET(amps);
-  //LOG64_SET(F("] VOLTS["));
-  //LOG64_SET(volts);
-  //LOG64_SET(F("] %["));
-  //LOG64_SET(percent);
-  //LOG64_SET(F("] AH["));
-  //LOG64_SET(ah_available);
-  //LOG64_SET(F("] 24["));
+  //  LOG64_SET(F("DISPLAY: REFRESH: AMPS["));
+  //  LOG64_SET(amps);
+  //  LOG64_SET(F("] VOLTS["));
+  //  LOG64_SET(volts);
+  //  LOG64_SET(F("] %["));
+  //  LOG64_SET(percent);
+  //  LOG64_SET(F("] AH["));
+  //  LOG64_SET(ah_available);
+  //  LOG64_SET(F("] 24["));
+  //  LOG64_NEW_LINE;
 
   float l24 = 0.0f;
   for (int i = 0; i < 24; i++)
