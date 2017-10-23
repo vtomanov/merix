@@ -28,7 +28,7 @@ uint8_t OPER_MAGIC_COUNTER = 0;
 //8606
 inline uint16_t OPER_MAGIC_GET()
 {
-  uint16_t ret = 86;  
+  uint16_t ret = 86;
   ret = ret << 8;
   ret += (OPER_MAGIC_COUNTER++);
 
@@ -37,9 +37,9 @@ inline uint16_t OPER_MAGIC_GET()
 
 // 8606
 inline bool OPER_MAGIC_CHECK(uint16_t magic)
-{  
+{
   uint8_t magic_8 = magic >> 8;
-  return (magic_8 == 86); 
+  return (magic_8 == 86);
 }
 
 #define OPER_NONE 0
@@ -71,7 +71,9 @@ struct OPER_DATA_PACKET : OPER_BASE
 struct OPER_HANDSHAKE_PACKET : OPER_BASE
 {
   uint16_t id;
+  uint8_t slave;
   uint8_t include;
+  uint8_t type;
   char name[21];
 };
 
@@ -115,6 +117,7 @@ inline uint8_t OPER_PARSE_PACKET(uint8_t buf[], OPER_PACKET & packet)
 
   switch (oper)
   {
+#if defined(MODULE_IS_CLIENT)
     case OPER_DATA_REQUEST :
       {
         packet.data_request_packet.seq = (uint8_t)magic;
@@ -130,6 +133,29 @@ inline uint8_t OPER_PARSE_PACKET(uint8_t buf[], OPER_PACKET & packet)
         LOG64_SET(packet.data_request_packet.id);
 
       }; break;
+    case OPER_HANDSHAKE_REQUEST :
+      {
+        packet.handshake_request_packet.seq = (uint8_t)magic;
+        ((uint8_t*)&packet.handshake_request_packet.server_id)[0] = buf[pos++];
+        ((uint8_t*)&packet.handshake_request_packet.server_id)[1] = buf[pos++];
+
+        LOG64_SET(F("] SERVER_ID["));
+        LOG64_SET(packet.handshake_request_packet.server_id);
+
+      }; break;
+
+    case OPER_RESET_REQUEST :
+      {
+        packet.reset_request_packet.seq = (uint8_t)magic;
+        ((uint8_t*)&packet.reset_request_packet.server_id)[0] = buf[pos++];
+        ((uint8_t*)&packet.reset_request_packet.server_id)[1] = buf[pos++];
+
+        LOG64_SET(F("] SERVER_ID["));
+        LOG64_SET(packet.reset_request_packet.server_id);
+
+      }; break;
+#endif
+#if defined(MODULE_IS_SERVER)
     case OPER_DATA :
       {
         packet.data_packet.seq = (uint8_t)magic;
@@ -162,7 +188,9 @@ inline uint8_t OPER_PARSE_PACKET(uint8_t buf[], OPER_PACKET & packet)
         ((uint8_t*)&packet.handshake_packet.server_id)[1] = buf[pos++];
         ((uint8_t*)&packet.handshake_packet.id)[0] = buf[pos++];
         ((uint8_t*)&packet.handshake_packet.id)[1] = buf[pos++];
+        packet.handshake_packet.slave = buf[pos++];
         packet.handshake_packet.include = buf[pos++];
+        packet.handshake_packet.type = buf[pos++];
         uint8_t len = buf[pos++];
         memcpy(&packet.handshake_packet.name[0], & buf[pos], len);
         packet.handshake_packet.name[len] = 0;
@@ -172,33 +200,17 @@ inline uint8_t OPER_PARSE_PACKET(uint8_t buf[], OPER_PACKET & packet)
         LOG64_SET(packet.handshake_packet.server_id);
         LOG64_SET(F("] ID["));
         LOG64_SET(packet.handshake_packet.id);
+        LOG64_SET(F("] SLAVE["));
+        LOG64_SET(packet.handshake_packet.slave);
         LOG64_SET(F("] INCLUDE["));
         LOG64_SET(packet.handshake_packet.include);
+        LOG64_SET(F("] TYPE["));
+        LOG64_SET(packet.handshake_packet.type);
         LOG64_SET(F("] NAME["));
         LOG64_SET(packet.handshake_packet.name);
 
       }; break;
-    case OPER_HANDSHAKE_REQUEST :
-      {
-        packet.handshake_request_packet.seq = (uint8_t)magic;
-        ((uint8_t*)&packet.handshake_request_packet.server_id)[0] = buf[pos++];
-        ((uint8_t*)&packet.handshake_request_packet.server_id)[1] = buf[pos++];
-
-        LOG64_SET(F("] SERVER_ID["));
-        LOG64_SET(packet.handshake_request_packet.server_id);
-
-      }; break;
-
-    case OPER_RESET_REQUEST :
-      {
-        packet.reset_request_packet.seq = (uint8_t)magic;
-        ((uint8_t*)&packet.reset_request_packet.server_id)[0] = buf[pos++];
-        ((uint8_t*)&packet.reset_request_packet.server_id)[1] = buf[pos++];
-
-        LOG64_SET(F("] SERVER_ID["));
-        LOG64_SET(packet.reset_request_packet.server_id);
-
-      }; break;
+#endif
   }
 
   LOG64_SET(F("]"));

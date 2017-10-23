@@ -57,6 +57,8 @@ RHReliableDatagram RF_MANAGER = RHReliableDatagram(RF_DRIVER, MODULE_HANDSHAKE_D
 # define RF_MAX_MESSAGE_LEN 30
 uint8_t RF_SIMULATION_BUF[RF_MAX_MESSAGE_LEN];
 uint8_t RF_SIMULATION_SIZE;
+uint8_t RF_SIMULATION_BUF_SLAVE[RF_MAX_MESSAGE_LEN];
+uint8_t RF_SIMULATION_SIZE_SLAVE;
 #endif
 
 uint8_t RF_LAST_RECEIVED_BUF[RF_MAX_MESSAGE_LEN];
@@ -165,10 +167,24 @@ inline bool RF_SEND_DATA(uint8_t buf[], uint8_t size, uint8_t to)
 #endif
 
 #if defined(RF_NETWORK_SIMULATION)
-  RF_SIMULATION_SIZE = size;
-  memcpy(RF_SIMULATION_BUF, buf, size);
+  if (RF_SIMULATION_SIZE == 0)
+  {
+    RF_SIMULATION_SIZE = size;
+    memcpy(RF_SIMULATION_BUF, buf, size);
 
-  ret = true;
+    ret = true;
+  }
+  else if (RF_SIMULATION_SIZE_SLAVE == 0)
+  {
+    RF_SIMULATION_SIZE_SLAVE = size;
+    memcpy(RF_SIMULATION_BUF_SLAVE, buf, size);
+
+    ret = true;
+  }
+  else
+  {
+    return false;
+  }
 #endif
 
   return ret;
@@ -249,6 +265,37 @@ inline bool RF_RECEIVE_DATA(uint8_t buf[], uint8_t & size)
 
       return false;
     }
+
+
+    memcpy(RF_LAST_RECEIVED_BUF, buf_tmp, size_tmp);
+    RF_LAST_RECEIVED_SIZE = size_tmp;
+
+    memcpy(buf, buf_tmp, size_tmp);
+    size = size_tmp;
+
+    LOG64_SET(F("RF: RECEIVE_DATA: SIZE["));
+    LOG64_SET(size_tmp);
+    LOG64_SET(F("]"));
+    LOG64_NEW_LINE;
+
+    return true;
+  }
+  else if (RF_SIMULATION_SIZE_SLAVE > 0)
+  {
+    size_tmp = RF_SIMULATION_SIZE_SLAVE;
+    memcpy(buf_tmp, RF_SIMULATION_BUF_SLAVE, size_tmp);
+    RF_SIMULATION_SIZE_SLAVE = 0;
+
+    if (RF_CMP(RF_LAST_RECEIVED_BUF, RF_LAST_RECEIVED_SIZE, buf_tmp, size_tmp))
+    {
+      LOG64_SET(F("RF: RECEIVE_DATA: DUPLICATE: SIZE["));
+      LOG64_SET(size_tmp);
+      LOG64_SET(F("]"));
+      LOG64_NEW_LINE;
+
+      return false;
+    }
+
 
     memcpy(RF_LAST_RECEIVED_BUF, buf_tmp, size_tmp);
     RF_LAST_RECEIVED_SIZE = size_tmp;
@@ -342,8 +389,25 @@ inline void RF_PROCESS(OPER_PACKET  & oper_packet, uint8_t oper)
           if (SERVER_STORE_CLIENT_ID[i] == 0xFFFF)
           {
             SERVER_STORE_CLIENT_ID[i] = oper_packet.handshake_packet.id;
+            SERVER_STORE_CLIENT_SLAVE[i] = oper_packet.handshake_packet.slave;
             SERVER_STORE_CLIENT_INCLUDE[i] = oper_packet.handshake_packet.include;
+            SERVER_STORE_CLIENT_TYPE[i] = oper_packet.handshake_packet.type;
             strcpy(SERVER_STORE_CLIENT_NAME[i], oper_packet.handshake_packet.name);
+
+            //            LOG64_SET(F("RF: PROCESSING:  OPER_HANDSHAKE INDEX: "));
+            //            LOG64_SET(i);
+            //            LOG64_SET(F("] ID["));
+            //            LOG64_SET(oper_packet.handshake_packet.id);
+            //            LOG64_SET(F("] SLAVE["));
+            //            LOG64_SET(oper_packet.handshake_packet.slave);
+            //            LOG64_SET(F("] INCLUDE["));
+            //            LOG64_SET(oper_packet.handshake_packet.include);
+            //            LOG64_SET(F("] TYPE["));
+            //            LOG64_SET(oper_packet.handshake_packet.type);
+            //            LOG64_SET(F("] NAME["));
+            //            LOG64_SET(oper_packet.handshake_packet.name);
+            //            LOG64_SET(F("]"));
+            //            LOG64_NEW_LINE;
 
             break;
           }
@@ -391,9 +455,12 @@ inline void RF_PROCESS(OPER_PACKET  & oper_packet, uint8_t oper)
         uint8_t out_size = RF_MAX_MESSAGE_LEN;
 
         ID_GET_HANDSHAKE_PACKET(out_buf, out_size);
-
         RF_SEND_DATA(out_buf, out_size, 0);
 
+#if defined(MODULE_SLAVE_ENABLED)
+        ID_GET_HANDSHAKE_PACKET(out_buf, out_size, 1);
+        RF_SEND_DATA(out_buf, out_size, 0);
+#endif
       }; return;
     case OPER_RESET_REQUEST :
       {
@@ -453,11 +520,68 @@ inline void RF_PROCESS(OPER_PACKET  & oper_packet, uint8_t oper)
         float volts;
         FLOAT_FLOAT ah;
 
-        CLIENT_SENSORS_GET(amps, volts, ah);
+#if defined(MODULE_SLAVE_ENABLED)
+#if (MODULE_SLAVE_TYPE == 0)
+        float volts_slave;
+        float amps_slave;
+        FLOAT_FLOAT ah_slave;
+        CLIENT_SENSORS_GET(amps, volts, ah, volts_slave, amps_slave, ah_slave);
 
         ID_GET_DATA_PACKET(out_buf, out_size, amps, volts, ah);
-
         RF_SEND_DATA(out_buf, out_size, 0);
+
+        ID_GET_DATA_PACKET(out_buf, out_size, amps_slave, volts_slave, ah_slave, ID_SLAVE_ID);
+        RF_SEND_DATA(out_buf, out_size, 0);
+#endif
+#if (MODULE_SLAVE_TYPE == 1)
+        float volts_slave;
+        float amps_slave;
+        CLIENT_SENSORS_GET(amps, volts, ah, volts_slave, amps_slave);
+
+        ID_GET_DATA_PACKET(out_buf, out_size, amps, volts, ah);
+        RF_SEND_DATA(out_buf, out_size, 0);
+
+        ID_GET_DATA_PACKET(out_buf, out_size, amps_slave, volts_slave, FLOAT_FLOAT(MERIX_NOT_AVAILABLE), ID_SLAVE_ID);
+        RF_SEND_DATA(out_buf, out_size, 0);
+#endif
+#if (MODULE_SLAVE_TYPE == 2)
+        float volts_slave;
+        CLIENT_SENSORS_GET(amps, volts, ah, volts_slave);
+
+        ID_GET_DATA_PACKET(out_buf, out_size, amps, volts, ah);
+        RF_SEND_DATA(out_buf, out_size, 0);
+
+        ID_GET_DATA_PACKET(out_buf, out_size, MERIX_NOT_AVAILABLE, volts_slave, FLOAT_FLOAT(MERIX_NOT_AVAILABLE), ID_SLAVE_ID);
+        RF_SEND_DATA(out_buf, out_size, 0);
+#endif
+#if (MODULE_SLAVE_TYPE == 3)
+        float amps_slave;
+        CLIENT_SENSORS_GET(amps, volts, ah, amps_slave);
+
+        ID_GET_DATA_PACKET(out_buf, out_size, amps, volts, ah);
+        RF_SEND_DATA(out_buf, out_size, 0);
+
+        ID_GET_DATA_PACKET(out_buf, out_size, amps_slave, MERIX_NOT_AVAILABLE, FLOAT_FLOAT(MERIX_NOT_AVAILABLE), ID_SLAVE_ID);
+        RF_SEND_DATA(out_buf, out_size, 0);
+#endif
+#if (MODULE_SLAVE_TYPE == 4)
+        float amps_slave;
+        FLOAT_FLOAT ah_slave;
+        CLIENT_SENSORS_GET(amps, volts, ah, amps_slave, ah_slave);
+
+        ID_GET_DATA_PACKET(out_buf, out_size, amps, volts, ah);
+        RF_SEND_DATA(out_buf, out_size, 0);
+
+        ID_GET_DATA_PACKET(out_buf, out_size, amps_slave, MERIX_NOT_AVAILABLE, ah_slave, ID_SLAVE_ID);
+        RF_SEND_DATA(out_buf, out_size, 0);
+#endif
+#else
+        CLIENT_SENSORS_GET(amps, volts, ah);
+        ID_GET_DATA_PACKET(out_buf, out_size, amps, volts, ah);
+        RF_SEND_DATA(out_buf, out_size, 0);
+#endif
+
+
 
       }; return;
 #endif

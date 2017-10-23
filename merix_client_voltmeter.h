@@ -22,7 +22,7 @@
   VCC ->BATTERY +
   GND ->BATTERY -
   - ->ARDUINO GND
-  s ->ARDUINO ANALOG PIN 1
+  s ->ARDUINO ANALOG PIN 
 */
 ////////////////////////////////////////////////////////////////////////////////////
 

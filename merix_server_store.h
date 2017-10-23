@@ -32,6 +32,8 @@ uint8_t SERVER_STORE_DATA_REQUEST_INDEX;
 
 uint16_t SERVER_STORE_CLIENT_ID[MAX_CLIENTS];
 uint8_t SERVER_STORE_CLIENT_INCLUDE[MAX_CLIENTS];
+uint8_t SERVER_STORE_CLIENT_SLAVE[MAX_CLIENTS];
+uint8_t SERVER_STORE_CLIENT_TYPE[MAX_CLIENTS];
 uint8_t SERVER_STORE_CLIENT_SEQ[MAX_CLIENTS];
 char SERVER_STORE_CLIENT_NAME[MAX_CLIENTS][20];
 
@@ -206,7 +208,7 @@ inline void SERVER_STORE_PROCESS_DATA(uint16_t id, float amps, float volts, uint
       SERVER_STORE_CLIENT_VOLTS[i] = volts;
       SERVER_STORE_CLIENT_AMPS[i] = (abs(amps) < CLIENT_MIN_CONSUMPTION) ? 0.0f : amps;
 
-      if (ah.GET() < 0)
+      if ((ah.GET() < 0) && (ah.GET() > MERIX_NOT_AVAILABLE))
       {
         SERVER_STORE_TOTAL_DISCHARGED.ADD(ah);
         SERVER_STORE_TOTAL_PER_CLIENT[i].ADD(ah);
@@ -214,24 +216,28 @@ inline void SERVER_STORE_PROCESS_DATA(uint16_t id, float amps, float volts, uint
 
       if (!SERVER_STORE_INITIALIZED)
       {
-        bool all_data_available = true;
+        bool data_available = true;
         for (uint8_t j = 0; j < MAX_CLIENTS; j++)
         {
           if (SERVER_STORE_CLIENT_ID[j] != 0xFFFF)
           {
-            if (SERVER_STORE_CLIENT_VOLTS[j] <= MERIX_NOT_AVAILABLE)
+            if (SERVER_STORE_CLIENT_INCLUDE[i] > 0)
             {
-              all_data_available = false;
-              break;
-            }
-            if (SERVER_STORE_CLIENT_AMPS[j] <= MERIX_NOT_AVAILABLE)
-            {
-              all_data_available = false;
-              break;
+              if (SERVER_STORE_CLIENT_VOLTS[j] <= MERIX_NOT_AVAILABLE)
+              {
+                data_available = false;
+                break;
+              }
+              if (SERVER_STORE_CLIENT_AMPS[j] <= MERIX_NOT_AVAILABLE)
+              {
+                data_available = false;
+                break;
+              }
             }
           }
         }
-        if (all_data_available)
+        
+        if (data_available)
         {
           float server_volts = SERVER_STORE_VOLTS();
           float server_amps = SERVER_STORE_AMPS();

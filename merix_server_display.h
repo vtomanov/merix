@@ -327,6 +327,7 @@ inline void SERVER_DISPLAY_()
   if (DO_EXECUTE(millis(), SERVER_DISPLAY_A24_TIME_TO_TOGGLE_LAST_EXECUTE, SERVER_DISPLAY_A24_TIME_TO_TOGGLE_TIMEOUT))
   {
     SERVER_DISPLAY_A24_TIME_TO_TOGGLE_LAST_EXECUTE = millis();
+
     if (SERVER_DISPLAY_A24_TIME_TO_TOGGLE == 0)
     {
       SERVER_DISPLAY_A24_TIME_TO_TOGGLE = 1;
@@ -347,206 +348,199 @@ inline void SERVER_DISPLAY_()
   bool data_changed = false;
   if (DO_EXECUTE(millis(), SERVER_DISPLAY_REFRESH_LAST_EXECUTE, SERVER_DISPLAY_REFRESH_TIMEOUT))
   {
+
     SERVER_DISPLAY_REFRESH_LAST_EXECUTE = millis();
 
-#if defined(SERVER_DISPLAY_SIMULATION)
-    bool printed = false;
-#endif
-
-    //12.45V -324.14A 100%
-    //01234567890123456789
-    //TO50%:   20H 15M 03S
-    // or
-    //A:-123AH 24/H:-124AH
-
-    if (SERVER_DISPLAY_VOLTS != SERVER_DISPLAY_VOLTS_PUBLISHED)
-    {
-      SERVER_DISPLAY_VOLTS_PUBLISHED = SERVER_DISPLAY_VOLTS;
-
-      String v = (SERVER_DISPLAY_VOLTS <= 0) ? String(F("--.--")) : String(SERVER_DISPLAY_VOLTS , 2);
-      v += 'V';
-      for (; v.length() < 6; )
-      {
-        v = ' ' + v;
-      }
-
-      SERVER_DISPLAY_PRINT(0, 0, v);
-
-      data_changed = true;
-
-#if defined(SERVER_DISPLAY_SIMULATION)
-      printed = true;
-#endif
-    }
-
-    if (SERVER_DISPLAY_AMPS != SERVER_DISPLAY_AMPS_PUBLISHED)
-    {
-      SERVER_DISPLAY_AMPS_PUBLISHED = SERVER_DISPLAY_AMPS;
-
-      String a = (SERVER_DISPLAY_AMPS <= MERIX_NOT_AVAILABLE) ? String(F("---.--")) : String(SERVER_DISPLAY_AMPS , 2);
-      a += 'A';
-      for (; a.length() < 9; )
-      {
-        a = ' ' + a;
-      }
-
-      SERVER_DISPLAY_PRINT(6, 0, a);
-
-      data_changed = true;
-
-#if defined(SERVER_DISPLAY_SIMULATION)
-      printed = true;
-#endif
-    }
-
-    // need to be displayed always as to recover from gauge switched off
-    {
-      SERVER_DISPLAY_PERCENT_PUBLISHED = SERVER_DISPLAY_PERCENT;
-
-      String p = ((SERVER_DISPLAY_VOLTS <= 0) || (SERVER_DISPLAY_AMPS <= MERIX_NOT_AVAILABLE)) ? String(F("---")) :   String(SERVER_DISPLAY_PERCENT);
-      p += '%';
-      for (; p.length() < 5; )
-      {
-        p = ' ' + p;
-      }
-
-      SERVER_DISPLAY_PRINT(15, 0, p);
-#if defined(SERVER_DISPLAY_SIMULATION)
-      printed = true;
-#endif
-    }
-
-    if (SERVER_DISPLAY_A24_TIME_TO_TOGGLE == 0)
+    if (SERVER_STATE == SERVER_STATE_WORK)
     {
 
-      if ((SERVER_DISPLAY_LAST24 != SERVER_DISPLAY_LAST24_PUBLISHED) || (SERVER_DISPLAY_A24_TIME_TO_TOGGLE_PUBLISHED != SERVER_DISPLAY_A24_TIME_TO_TOGGLE))
-      {
-        SERVER_DISPLAY_LAST24_PUBLISHED = SERVER_DISPLAY_LAST24;
+#if defined(SERVER_DISPLAY_SIMULATION)
+      bool printed = false;
+#endif
 
-        String l = String(SERVER_DISPLAY_LAST24, 0);
-        l += "AH";
-        for (; l.length() < 6; )
+      //12.45V -324.14A 100%
+      //01234567890123456789
+      //TO50%:   20H 15M 03S
+      // or
+      //A:-123AH 24/H:-124AH
+
+      if (SERVER_DISPLAY_VOLTS != SERVER_DISPLAY_VOLTS_PUBLISHED)
+      {
+        SERVER_DISPLAY_VOLTS_PUBLISHED = SERVER_DISPLAY_VOLTS;
+
+        String v = (SERVER_DISPLAY_VOLTS <= 0) ? String(F("--.--")) : String(SERVER_DISPLAY_VOLTS , 2);
+        v += 'V';
+        for (; v.length() < 6; )
         {
-          l = ' ' + l;
+          v = ' ' + v;
         }
-        SERVER_DISPLAY_PRINT(8, 1, " 24/H:");
-        SERVER_DISPLAY_PRINT(14, 1, l);
+
+        SERVER_DISPLAY_PRINT(0, 0, v);
+
+        data_changed = true;
+
 #if defined(SERVER_DISPLAY_SIMULATION)
         printed = true;
 #endif
       }
 
-      if ((SERVER_DISPLAY_AH_AVAILABLE != SERVER_DISPLAY_AH_AVAILABLE_PUBLISHED) || (SERVER_DISPLAY_A24_TIME_TO_TOGGLE_PUBLISHED != SERVER_DISPLAY_A24_TIME_TO_TOGGLE))
+      if (SERVER_DISPLAY_AMPS != SERVER_DISPLAY_AMPS_PUBLISHED)
       {
-        SERVER_DISPLAY_AH_AVAILABLE_PUBLISHED = SERVER_DISPLAY_AH_AVAILABLE;
+        SERVER_DISPLAY_AMPS_PUBLISHED = SERVER_DISPLAY_AMPS;
 
-        String h = String((SERVER_DISPLAY_AH_AVAILABLE <= 0.0f) ? 0 : round(SERVER_DISPLAY_AH_AVAILABLE));
-        h += "AH";
-        for (; h.length() < 6; )
+        String a = (SERVER_DISPLAY_AMPS <= MERIX_NOT_AVAILABLE) ? String(F("---.--")) : String(SERVER_DISPLAY_AMPS , 2);
+        a += 'A';
+        for (; a.length() < 9; )
         {
-          h = ' ' + h;
+          a = ' ' + a;
         }
-        SERVER_DISPLAY_PRINT(0, 1, "A:");
-        SERVER_DISPLAY_PRINT(2, 1, h);
+
+        SERVER_DISPLAY_PRINT(6, 0, a);
+
+        data_changed = true;
+
 #if defined(SERVER_DISPLAY_SIMULATION)
         printed = true;
 #endif
       }
 
-      SERVER_DISPLAY_A24_TIME_TO_TOGGLE_PUBLISHED = SERVER_DISPLAY_A24_TIME_TO_TOGGLE;
-    }
-    else
-    {
-      if ((SERVER_DISPLAY_TIME_TYPE != SERVER_DISPLAY_TIME_TYPE_PUBLISHED) || (SERVER_DISPLAY_TIME != SERVER_DISPLAY_TIME_PUBLISHED) || (SERVER_DISPLAY_A24_TIME_TO_TOGGLE_PUBLISHED != SERVER_DISPLAY_A24_TIME_TO_TOGGLE))
+      // need to be displayed always as to recover from gauge switched off
       {
-        if ((SERVER_STORE_AH.GET() != MERIX_NOT_AVAILABLE) && (SERVER_DISPLAY_AMPS != MERIX_NOT_AVAILABLE))
+        SERVER_DISPLAY_PERCENT_PUBLISHED = SERVER_DISPLAY_PERCENT;
+
+        String p = ((SERVER_DISPLAY_VOLTS <= 0) || (SERVER_DISPLAY_AMPS <= MERIX_NOT_AVAILABLE)) ? String(F("---")) :   String(SERVER_DISPLAY_PERCENT);
+        p += '%';
+        for (; p.length() < 5; )
         {
-          SERVER_DISPLAY_TIME_TYPE_PUBLISHED = SERVER_DISPLAY_TIME_TYPE;
-          SERVER_DISPLAY_TIME_PUBLISHED = SERVER_DISPLAY_TIME;
+          p = ' ' + p;
+        }
 
-          float time = (SERVER_DISPLAY_TIME_TYPE == 0) ?
-                       SERVER_BATTERY_DATA_TO_DISCHARGE(SERVER_DISPLAY_AMPS * (-1) , SERVER_DISPLAY_PERCENT_TO_DISCHARGE) :
-                       SERVER_BATTERY_DATA_TO_CHARGE(SERVER_DISPLAY_AMPS * SERVER_STORE_DATA_LOSS_COEF, SERVER_DISPLAY_PERCENT_TO_CHARGE);
+        SERVER_DISPLAY_PRINT(15, 0, p);
+#if defined(SERVER_DISPLAY_SIMULATION)
+        printed = true;
+#endif
+      }
 
-          SERVER_DISPLAY_TIME = time;
+      if (SERVER_DISPLAY_A24_TIME_TO_TOGGLE == 0)
+      {
 
-          uint8_t h  = (uint8_t)time;
-          float minutesRemainder = (time - ((float)h)) * 60.0f;
-          uint8_t m = (uint8_t)minutesRemainder;
-          float secondsRemainder = (minutesRemainder - ((float)m)) * 60.0f;
-          uint8_t s = (uint8_t)secondsRemainder;
+        if ((SERVER_DISPLAY_LAST24 != SERVER_DISPLAY_LAST24_PUBLISHED) || (SERVER_DISPLAY_A24_TIME_TO_TOGGLE_PUBLISHED != SERVER_DISPLAY_A24_TIME_TO_TOGGLE))
+        {
+          SERVER_DISPLAY_LAST24_PUBLISHED = SERVER_DISPLAY_LAST24;
 
-          String t = String(s);
-          t += "S";
-          for (; t.length() < 3; )
+          String l = String(SERVER_DISPLAY_LAST24, 0);
+          l += "AH";
+          for (; l.length() < 6; )
           {
-            t = '0' + t;
+            l = ' ' + l;
           }
-          t = String(m) + F("M ") + t;
-          for (; t.length() < 7; )
-          {
-            t = '0' + t;
-          }
-          t = String(h) + F("H ") + t;
-          for (; t.length() < 14; )
-          {
-            t = ' ' + t;
-          }
-          String b = String(F("TO"));
-          b += (SERVER_DISPLAY_TIME_TYPE == 0) ? (uint8_t)SERVER_DISPLAY_PERCENT_TO_DISCHARGE : (uint8_t)SERVER_DISPLAY_PERCENT_TO_CHARGE;
-          b += F("%:");
-          SERVER_DISPLAY_PRINT(0, 1, b);
-          SERVER_DISPLAY_PRINT(6, 1, t);
-
+          SERVER_DISPLAY_PRINT(8, 1, " 24/H:");
+          SERVER_DISPLAY_PRINT(14, 1, l);
 #if defined(SERVER_DISPLAY_SIMULATION)
           printed = true;
 #endif
-          SERVER_DISPLAY_A24_TIME_TO_TOGGLE_PUBLISHED = SERVER_DISPLAY_A24_TIME_TO_TOGGLE;
         }
+
+        if ((SERVER_DISPLAY_AH_AVAILABLE != SERVER_DISPLAY_AH_AVAILABLE_PUBLISHED) || (SERVER_DISPLAY_A24_TIME_TO_TOGGLE_PUBLISHED != SERVER_DISPLAY_A24_TIME_TO_TOGGLE))
+        {
+          SERVER_DISPLAY_AH_AVAILABLE_PUBLISHED = SERVER_DISPLAY_AH_AVAILABLE;
+
+          String h = String((SERVER_DISPLAY_AH_AVAILABLE <= 0.0f) ? 0 : round(SERVER_DISPLAY_AH_AVAILABLE));
+          h += "AH";
+          for (; h.length() < 6; )
+          {
+            h = ' ' + h;
+          }
+          SERVER_DISPLAY_PRINT(0, 1, "A:");
+          SERVER_DISPLAY_PRINT(2, 1, h);
+#if defined(SERVER_DISPLAY_SIMULATION)
+          printed = true;
+#endif
+        }
+
+        SERVER_DISPLAY_A24_TIME_TO_TOGGLE_PUBLISHED = SERVER_DISPLAY_A24_TIME_TO_TOGGLE;
       }
-    }
+      else
+      {
+        if ((SERVER_DISPLAY_TIME_TYPE != SERVER_DISPLAY_TIME_TYPE_PUBLISHED) || (SERVER_DISPLAY_TIME != SERVER_DISPLAY_TIME_PUBLISHED) || (SERVER_DISPLAY_A24_TIME_TO_TOGGLE_PUBLISHED != SERVER_DISPLAY_A24_TIME_TO_TOGGLE))
+        {
+          if ((SERVER_STORE_AH.GET() != MERIX_NOT_AVAILABLE) && (SERVER_DISPLAY_AMPS != MERIX_NOT_AVAILABLE))
+          {
+            SERVER_DISPLAY_TIME_TYPE_PUBLISHED = SERVER_DISPLAY_TIME_TYPE;
+            SERVER_DISPLAY_TIME_PUBLISHED = SERVER_DISPLAY_TIME;
+
+            float time = (SERVER_DISPLAY_TIME_TYPE == 0) ?
+                         SERVER_BATTERY_DATA_TO_DISCHARGE(SERVER_DISPLAY_AMPS * (-1) , SERVER_DISPLAY_PERCENT_TO_DISCHARGE) :
+                         SERVER_BATTERY_DATA_TO_CHARGE(SERVER_DISPLAY_AMPS * SERVER_STORE_DATA_LOSS_COEF, SERVER_DISPLAY_PERCENT_TO_CHARGE);
+
+            SERVER_DISPLAY_TIME = time;
+
+            uint8_t h  = (uint8_t)time;
+            float minutesRemainder = (time - ((float)h)) * 60.0f;
+            uint8_t m = (uint8_t)minutesRemainder;
+            float secondsRemainder = (minutesRemainder - ((float)m)) * 60.0f;
+            uint8_t s = (uint8_t)secondsRemainder;
+
+            String t = String(s);
+            t += "S";
+            for (; t.length() < 3; )
+            {
+              t = '0' + t;
+            }
+            t = String(m) + F("M ") + t;
+            for (; t.length() < 7; )
+            {
+              t = '0' + t;
+            }
+            t = String(h) + F("H ") + t;
+            for (; t.length() < 14; )
+            {
+              t = ' ' + t;
+            }
+            String b = String(F("TO"));
+            b += (SERVER_DISPLAY_TIME_TYPE == 0) ? (uint8_t)SERVER_DISPLAY_PERCENT_TO_DISCHARGE : (uint8_t)SERVER_DISPLAY_PERCENT_TO_CHARGE;
+            b += F("%:");
+            SERVER_DISPLAY_PRINT(0, 1, b);
+            SERVER_DISPLAY_PRINT(6, 1, t);
 
 #if defined(SERVER_DISPLAY_SIMULATION)
-    if (printed)
-    {
-      SERVER_DISPLAY_PRINT_FINISH();
-    }
+            printed = true;
 #endif
-  }
-
-  bool do_data = false;
-  if ((do_data = DO_EXECUTE(millis(), SERVER_DISPLAY_DATA_LAST_EXECUTE, SERVER_DISPLAY_DATA_TIMEOUT)) || data_changed)
-  {
-    if (do_data)
-    {
-      SERVER_DISPLAY_DATA_LAST_EXECUTE = millis();
-    }
-
-    //01234567890123456789
-    //WATERMAKER        :3
-    //12.45V -324.14A 100%
-
-    uint8_t index_found = 255;
-    if (do_data)
-    {
-
-      if ((++SERVER_DISPLAY_INDEX) >= MAX_CLIENTS)
-      {
-        SERVER_DISPLAY_INDEX = 0;
-      }
-
-      for (uint8_t i = SERVER_DISPLAY_INDEX; i < MAX_CLIENTS; i++)
-      {
-        if (SERVER_STORE_CLIENT_ID[i] != 0xFFFF)
-        {
-          index_found = i;
-          break;
+            SERVER_DISPLAY_A24_TIME_TO_TOGGLE_PUBLISHED = SERVER_DISPLAY_A24_TIME_TO_TOGGLE;
+          }
         }
       }
 
-      if (index_found == 255)
+#if defined(SERVER_DISPLAY_SIMULATION)
+      if (printed)
       {
-        for (uint8_t i = 0; i < SERVER_DISPLAY_INDEX; i++)
+        SERVER_DISPLAY_PRINT_FINISH();
+      }
+#endif
+    }
+
+    bool do_data = false;
+    if ((do_data = DO_EXECUTE(millis(), SERVER_DISPLAY_DATA_LAST_EXECUTE, SERVER_DISPLAY_DATA_TIMEOUT)) || data_changed)
+    {
+      if (do_data)
+      {
+        SERVER_DISPLAY_DATA_LAST_EXECUTE = millis();
+      }
+
+      //01234567890123456789
+      //WATERMAKER        :3
+      //12.45V -324.14A 100%
+
+      uint8_t index_found = 255;
+      if (do_data)
+      {
+
+        if ((++SERVER_DISPLAY_INDEX) >= MAX_CLIENTS)
+        {
+          SERVER_DISPLAY_INDEX = 0;
+        }
+
+        for (uint8_t i = SERVER_DISPLAY_INDEX; i < MAX_CLIENTS; i++)
         {
           if (SERVER_STORE_CLIENT_ID[i] != 0xFFFF)
           {
@@ -554,68 +548,101 @@ inline void SERVER_DISPLAY_()
             break;
           }
         }
-      }
-    }
-    //    LOG64_SET(index_found);
-    //    LOG64_NEW_LINE;
 
-    if ((index_found != 255) || (data_changed))
-    {
-      if (index_found != 255)
-      {
-        SERVER_DISPLAY_INDEX = index_found;
-        SERVER_DISPLAY_INDEX_PUBLISHED = SERVER_DISPLAY_INDEX;
+        if (index_found == 255)
+        {
+          for (uint8_t i = 0; i < SERVER_DISPLAY_INDEX; i++)
+          {
+            if (SERVER_STORE_CLIENT_ID[i] != 0xFFFF)
+            {
+              index_found = i;
+              break;
+            }
+          }
+        }
       }
+      //    LOG64_SET(index_found);
+      //    LOG64_NEW_LINE;
 
-      String n = String(SERVER_STORE_CLIENT_NAME[SERVER_DISPLAY_INDEX]);
-      for (; n.length() < 18; )
+      if ((index_found != 255) || (data_changed))
       {
-        n += ' ';
-      }
-      n += ':';
-      n += (SERVER_STORE_CLIENT_SEQ[SERVER_DISPLAY_INDEX] % 10);
-      SERVER_DISPLAY_PRINT(0, 2, n);
+        if (index_found != 255)
+        {
+          SERVER_DISPLAY_INDEX = index_found;
+          SERVER_DISPLAY_INDEX_PUBLISHED = SERVER_DISPLAY_INDEX;
+        }
 
-      String v = (SERVER_STORE_CLIENT_VOLTS[SERVER_DISPLAY_INDEX] <= 0) ? String(F("--.--")) : String(SERVER_STORE_CLIENT_VOLTS[SERVER_DISPLAY_INDEX] , 2);
-      v += 'V';
-      for (; v.length() < 6; )
-      {
-        v = ' ' + v;
-      }
-      SERVER_DISPLAY_PRINT(0, 3, v);
+        String n = String(SERVER_STORE_CLIENT_NAME[SERVER_DISPLAY_INDEX]);
+        for (; n.length() < 18; )
+        {
+          n += ' ';
+        }
+        n += ':';
+        n += (SERVER_STORE_CLIENT_SEQ[SERVER_DISPLAY_INDEX] % 10);
+        SERVER_DISPLAY_PRINT(0, 2, n);
 
-      String a = (SERVER_STORE_CLIENT_AMPS[SERVER_DISPLAY_INDEX] <= MERIX_NOT_AVAILABLE) ? String(F("---.--")) : String(SERVER_STORE_CLIENT_AMPS[SERVER_DISPLAY_INDEX] , 2);
-      a += 'A';
-      for (; a.length() < 9; )
-      {
-        a = ' ' + a;
-      }
-      SERVER_DISPLAY_PRINT(6, 3, a);
+        if ((SERVER_STORE_CLIENT_TYPE[SERVER_DISPLAY_INDEX] != 3) && (SERVER_STORE_CLIENT_TYPE[SERVER_DISPLAY_INDEX] != 4))
+        {
+          String v = (SERVER_STORE_CLIENT_VOLTS[SERVER_DISPLAY_INDEX] <= 0) ? String(F("--.--")) : String(SERVER_STORE_CLIENT_VOLTS[SERVER_DISPLAY_INDEX] , 2);
+          v += 'V';
+          for (; v.length() < 6; )
+          {
+            v = ' ' + v;
+          }
+          SERVER_DISPLAY_PRINT(0, 3, v);
+        }
+        else
+        {
+          SERVER_DISPLAY_PRINT(6, 3, String(F("      ")));
+        }
 
-      FLOAT_FLOAT percent_total = SERVER_STORE_TOTAL_PER_CLIENT[SERVER_DISPLAY_INDEX];
-      if ((SERVER_STORE_TOTAL_DISCHARGED.GET() == 0.0f) && (SERVER_STORE_TOTAL_DISCHARGED.GET_LO() == 0.0f))
-      {
-        percent_total = FLOAT_FLOAT(100.0f);
-      }
-      else
-      {
-        percent_total.DIV(SERVER_STORE_TOTAL_DISCHARGED);
-        percent_total.MUL(FLOAT_FLOAT(100.0f));
-      }
+        if (SERVER_STORE_CLIENT_TYPE[SERVER_DISPLAY_INDEX] != 2)
+        {
+          String a = (SERVER_STORE_CLIENT_AMPS[SERVER_DISPLAY_INDEX] <= MERIX_NOT_AVAILABLE) ? String(F("---.--")) : String(SERVER_STORE_CLIENT_AMPS[SERVER_DISPLAY_INDEX] , 2);
+          a += 'A';
+          for (; a.length() < 9; )
+          {
+            a = ' ' + a;
+          }
+          SERVER_DISPLAY_PRINT(6, 3, a);
+        }
+        else
+        {
+          SERVER_DISPLAY_PRINT(6, 3, String(F("         ")));
+        }
 
-      String p = String((abs(percent_total.GET()) > 100.0f) ? (uint8_t)100 : (uint8_t)round(abs(percent_total.GET())));
-      p += '%';
-      for (; p.length() < 5; )
-      {
-        p = ' ' + p;
-      }
+        if ((SERVER_STORE_CLIENT_TYPE[SERVER_DISPLAY_INDEX] == 0) || (SERVER_STORE_CLIENT_TYPE[SERVER_DISPLAY_INDEX] == 4))
+        {
+          FLOAT_FLOAT percent_total = SERVER_STORE_TOTAL_PER_CLIENT[SERVER_DISPLAY_INDEX];
+          if ((SERVER_STORE_TOTAL_DISCHARGED.GET() == 0.0f) && (SERVER_STORE_TOTAL_DISCHARGED.GET_LO() == 0.0f))
+          {
+            percent_total = FLOAT_FLOAT(100.0f);
+          }
+          else
+          {
+            percent_total.DIV(SERVER_STORE_TOTAL_DISCHARGED);
+            percent_total.MUL(FLOAT_FLOAT(100.0f));
+          }
 
-      SERVER_DISPLAY_PRINT(15, 3, p);
+          String p = String((abs(percent_total.GET()) > 100.0f) ? (uint8_t)100 : (uint8_t)round(abs(percent_total.GET())));
+          p += '%';
+          for (; p.length() < 5; )
+          {
+            p = ' ' + p;
+          }
+
+          SERVER_DISPLAY_PRINT(15, 3, p);
+        }
+        else
+        {
+          SERVER_DISPLAY_PRINT(15, 3, String(F("     ")));
+        }
 
 #if defined(SERVER_DISPLAY_SIMULATION)
-      SERVER_DISPLAY_PRINT_FINISH();
+        SERVER_DISPLAY_PRINT_FINISH();
 #endif
 
+      }
     }
   }
 }
