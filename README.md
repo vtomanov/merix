@@ -84,5 +84,10 @@ and in merix_rf.h
 
 #define SERVER_DISPLAY_SIMULATION
 
+ - module type and slave type
+ 
+  TYPE 0 = volts and amps and ah, TYPE 1 - volts and amps, TYPE 2 - only volts, TYPE 3 ony amps, TYPE 4 amps and ah
+
+  - slave - when one arduino with one RF can transport data for 2 sensors - slave and master - they can be from different type also
 
 
