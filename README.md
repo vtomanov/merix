@@ -90,4 +90,8 @@ and in merix_rf.h
 
   - slave - when one arduino with one RF can transport data for 2 sensors - slave and master - they can be from different type also
 
+WARNINGS !!!!!
+
+  you need to point the antenas of the NRF24 to the sky as else you may encounter RF stability issues
+ 
 
