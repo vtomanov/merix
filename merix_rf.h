@@ -36,9 +36,9 @@ RH_NRF24 RF_DRIVER;
 #endif
 
 #define RF_BROADCAST_ADDRESS RH_BROADCAST_ADDRESS
-#define RH_RETRANSMIT_COUNT 7
-#define RF_HARD_RETRANSMIT_COUNT 7
-#define RF_HARD_RETRANSMIT_DELAY 7
+#define RH_RETRANSMIT_COUNT 5
+#define RF_HARD_RETRANSMIT_COUNT 5
+#define RF_HARD_RETRANSMIT_DELAY 5
 
 #if not defined(RF_NETWORK_SIMULATION)
 #if defined(MODULE_IS_SERVER)
@@ -83,6 +83,8 @@ inline void RF_INIT()
 #if defined(RF_RADIO_HEAD)
 
   RF_DRIVER.init();
+
+  // use this if you want to have different speed / power then default
   if (!RF_DRIVER.setRF(RH_NRF24::DataRate::DataRate250kbps, RH_NRF24::TransmitPower::TransmitPower0dBm))
   {
     LOG64_SET(F("RF: INIT RadioHead - Cannot set rate and power"));

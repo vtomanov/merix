@@ -23,7 +23,7 @@
   VCC ->BATTERY +
   GND ->BATTERY -
   - ->ARDUINO GND
-  s ->ARDUINO ANALOG PIN 
+  s ->ARDUINO ANALOG PIN
 */
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -77,10 +77,10 @@ inline float  CLIENT_VOLTMETER_SLAVE_CALC(uint16_t from_sensor)
 {
   // perform kalman
   CLIENT_VOLTMETER_SLAVE_KALMAN(CLIENT_VOLTMETER_SLAVE_KALMAN_X,
-                          CLIENT_VOLTMETER_SLAVE_KALMAN_P,
-                          CLIENT_VOLTMETER_SLAVE_KALMAN_Q,
-                          CLIENT_VOLTMETER_SLAVE_KALMAN_R,
-                          from_sensor);
+                                CLIENT_VOLTMETER_SLAVE_KALMAN_P,
+                                CLIENT_VOLTMETER_SLAVE_KALMAN_Q,
+                                CLIENT_VOLTMETER_SLAVE_KALMAN_R,
+                                from_sensor);
   return ((float)from_sensor) / CLIENT_VOLTMETER_SLAVE_DIVIDER;
 }
 
@@ -111,6 +111,9 @@ inline void CLIENT_VOLTMETER_SLAVE_()
     if (CLIENT_VOLTMETER_SLAVE_STORAGE_COUNTER < 10)
     {
       uint16_t value = (uint16_t)analogRead(CLIENT_VOLTMETER_SLAVE_PIN);
+      //      LOG64_SET(F("SLAVE:"));
+      //      LOG64_SET(value);
+      //      LOG64_NEW_LINE;
       INSERT_SORT(CLIENT_VOLTMETER_SLAVE_STORAGE,  CLIENT_VOLTMETER_SLAVE_CALC(value), CLIENT_VOLTMETER_SLAVE_STORAGE_COUNTER++);
     }
   }
@@ -133,8 +136,9 @@ inline void CLIENT_VOLTMETER_SLAVE_()
 inline float CLIENT_VOLTMETER_SLAVE_GET()
 {
 #if not defined(CLIENT_VOLTMETER_SLAVE_SIMULATION)
-  LOG64_SET(CLIENT_VOLTMETER_SLAVE_VALUE);
-  LOG64_NEW_LINE;
+  //  LOG64_SET(F("SLAVE:"));
+  //  LOG64_SET(CLIENT_VOLTMETER_SLAVE_VALUE);
+  //  LOG64_NEW_LINE;
   return CLIENT_VOLTMETER_SLAVE_VALUE;
 #else
   return ((float)random(12, 14)) + (((float)random(33, 99)) / 100.0f);

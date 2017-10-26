@@ -22,7 +22,7 @@
   VCC ->BATTERY +
   GND ->BATTERY -
   - ->ARDUINO GND
-  s ->ARDUINO ANALOG PIN 
+  s ->ARDUINO ANALOG PIN
 */
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -109,6 +109,9 @@ inline void CLIENT_VOLTMETER_()
     if (CLIENT_VOLTMETER_STORAGE_COUNTER < 10)
     {
       uint16_t value = (uint16_t)analogRead(CLIENT_VOLTMETER_PIN);
+      //      LOG64_SET(F("MASTER:"));
+      //      LOG64_SET(value);
+      //      LOG64_NEW_LINE;
       INSERT_SORT(CLIENT_VOLTMETER_STORAGE,  CLIENT_VOLTMETER_CALC(value), CLIENT_VOLTMETER_STORAGE_COUNTER++);
     }
   }
@@ -131,6 +134,9 @@ inline void CLIENT_VOLTMETER_()
 inline float CLIENT_VOLTMETER_GET()
 {
 #if not defined(CLIENT_VOLTMETER_SIMULATION)
+  //  LOG64_SET(F("MASTER:"));
+  //  LOG64_SET(CLIENT_VOLTMETER_VALUE);
+  //  LOG64_NEW_LINE;
   return CLIENT_VOLTMETER_VALUE;
 #else
   return ((float)random(12, 14)) + (((float)random(33, 99)) / 100.0f);

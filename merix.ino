@@ -101,10 +101,14 @@
 
   #define SERVER_DISPLAY_SIMULATION
 
-  - module type and slave type 
+  - module type and slave type
   TYPE 0 = volts and amps and ah, TYPE 1 - volts and amps, TYPE 2 - only volts, TYPE 3 ony amps, TYPE 4 amps and ah
 
   - slave - when one arduino with one RF can transport data for 2 sensors - slave and master - they can be from different type also
+
+  WARNINGS !!!!!
+
+  you need to point the antenas of the NRF24 to the sky as else you may encounter RF stability issues
 */
 
 #include <avr/pgmspace.h>
@@ -121,18 +125,18 @@
 //#define MODULE_IS_CLIENT
 #define MODULE_IS_SERVER
 
-//////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
 // PLEASE SET VERSION and REVISION HERE
 
-#define Version_Major_Minor_Revision F("Ver.#0.0.376")
+#define Version_Major_Minor_Revision F("Ver.#0.0.378")
 
 //////////////////////////////////////////////////////////////////////////////////
 // PLEASE SET MODULE NAME e.g. Main Consumers, Bow Thruster, Inverter, Watermaker ( name can be max 18 symbols)
 
 #if defined(MODULE_IS_CLIENT)
 
-// if slave is enabled - make sure you have set : MODULE_SLAVE_NAME, MODULE_SLAVE_INCLUDE, MODULE_SLAVE_INDEX ( expected to be MODULE_HANDSHAKE_DELAY_INDEX + 1) 
-//#define MODULE_SLAVE_ENABLED
+// if slave is enabled - make sure you have set : MODULE_SLAVE_NAME, MODULE_SLAVE_INCLUDE, MODULE_SLAVE_INDEX ( expected to be MODULE_HANDSHAKE_DELAY_INDEX + 1)
+#define MODULE_SLAVE_ENABLED
 
 //                     123456789012345
 #define MODULE_NAME F("HOUSE CONSUMERS")
@@ -302,6 +306,19 @@ void setup()
 #if defined(MODULE_IS_CLIENT)
   CLIENT_VOLTMETER_INIT();
   CLIENT_AMPERMETER_INIT();
+
+#if defined(MODULE_SLAVE_ENABLED)
+#if ((MODULE_SLAVE_TYPE != 3) && (MODULE_SLAVE_TYPE != 4))
+  CLIENT_VOLTMETER_SLAVE_INIT();
+#endif
+#endif
+
+#if defined(MODULE_SLAVE_ENABLED)
+#if (MODULE_SLAVE_TYPE != 2)
+  CLIENT_AMPERMETER_SLAVE_INIT();
+#endif
+#endif
+
   // Init client meters and calculations
   CLIENT_SENSORS_INIT();
 #endif
@@ -430,8 +447,23 @@ void loop()
 #endif
 
 #if defined(MODULE_IS_CLIENT)
-  // Pumpo client voltemeter
+
+#if defined(MODULE_SLAVE_ENABLED)
+#if ((MODULE_SLAVE_TYPE != 3) && (MODULE_SLAVE_TYPE != 4))
+  // Pump client voltemeter slave
+  CLIENT_VOLTMETER_SLAVE_();
+#endif
+#endif
+
+  // Pump client voltemeter
   CLIENT_VOLTMETER_();
+
+#if defined(MODULE_SLAVE_ENABLED)
+#if (MODULE_SLAVE_TYPE != 2)
+  //Pump client ampermeter slave
+  CLIENT_AMPERMETER_SLAVE_();
+#endif
+#endif
 
   //Pump client ampermeter
   CLIENT_AMPERMETER_();
