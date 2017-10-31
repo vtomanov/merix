@@ -93,5 +93,53 @@ and in merix_rf.h
 WARNINGS !!!!!
 
   you need to point the antenas of the NRF24 to the sky as else you may encounter RF stability issues
- 
+  
+ INSTRUCTIONS FOR RUNNING THE SIMULATION:
+
+  file : merix.h
+  uncomment both lines :
+
+  #define MODULE_IS_CLIENT
+  #define MODULE_IS_SERVER
+
+  file: merix_client_ampermeter.h
+  uncomment line:
+  #define CLIENT_AMPERMETER_SIMULATION
+
+  file: merix_client_voltmeter.h
+  uncomment line:
+  #define CLIENT_VOLTMETER_SIMULATION
+
+  file: merix_server_display.h
+  uncomment line :
+  #define SERVER_DISPLAY_SIMULATION
+
+  file : merix_rf.h
+  uncomment line :
+  #define RF_NETWORK_SIMULATION
+
+  comment out line:
+  #define RF_RADIO_HEAD
+
+  compile for arduino Mega , upload  and all will be displayed in the serial screen - simulation will 
+  have one client ("HOUSE CONSUMERS") which measure - volts, amps and consumption
+
+  to add simulations for one slave attached to this measuring point also you need :
+
+  file : merix.h
+  uncomment line:
+  #define MODULE_SLAVE_ENABLED
+
+  file : merix_client_voltmeter_slave.h
+  uncomment line:
+  #define CLIENT_VOLTMETER_SLAVE_SIMULATION
+
+  Compile, upload to arduino Mega and you will see in addition one slave ("START BATTER")  attached to the 
+  measuring point which measures only Volts , changing slave type in merix.h  to #define MODULE_SLAVE_TYPE 0  
+  will add the slave to measure amps also , changing #define MODULE_SLAVE_INCLUDE 1 - will include the slave 
+  measurement as part of the calculations for battery sate, consummation usage etc.
+
+  FYI - the idea for slave is if you have 2 measuring points very close to each other and you just 
+  want to have two measuring but only one sender to the main module/server - e.g. my stater battery 
+  and house bank 1 are very close.
 
