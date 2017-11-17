@@ -34,6 +34,7 @@ uint16_t SERVER_STORE_CLIENT_ID[MAX_CLIENTS];
 uint8_t SERVER_STORE_CLIENT_INCLUDE[MAX_CLIENTS];
 uint8_t SERVER_STORE_CLIENT_SLAVE[MAX_CLIENTS];
 uint8_t SERVER_STORE_CLIENT_TYPE[MAX_CLIENTS];
+uint8_t SERVER_STORE_CLIENT_INDEX[MAX_CLIENTS];
 uint8_t SERVER_STORE_CLIENT_SEQ[MAX_CLIENTS];
 char SERVER_STORE_CLIENT_NAME[MAX_CLIENTS][20];
 
@@ -43,8 +44,9 @@ float SERVER_STORE_CLIENT_AMPS[MAX_CLIENTS];
 bool SERVER_STORE_INITIALIZED;
 FLOAT_FLOAT SERVER_STORE_AH;
 
-#define SERVER_STORE_TOTAL_DISCHARGED_FOR_CLEAR (20000.0f)
+#define SERVER_STORE_TOTAL_FOR_CLEAR (20000.0f)
 FLOAT_FLOAT SERVER_STORE_TOTAL_DISCHARGED;
+FLOAT_FLOAT SERVER_STORE_TOTAL_CHARGED;
 FLOAT_FLOAT SERVER_STORE_TOTAL_PER_CLIENT[MAX_CLIENTS];
 
 float SERVER_STORE_LAST24[24];
@@ -66,6 +68,7 @@ inline void SERVER_STORE_INIT()
   SERVER_STORE_AH = FLOAT_FLOAT(MERIX_NOT_AVAILABLE);
   SERVER_STORE_DATA_REQUEST_INDEX = 0;
   SERVER_STORE_TOTAL_DISCHARGED = FLOAT_FLOAT(0.0f);
+  SERVER_STORE_TOTAL_CHARGED = FLOAT_FLOAT(0.0f);
   SERVER_STORE_LAST1 = FLOAT_FLOAT(0.0f);;
 
   for (uint8_t i = 0; i < MAX_CLIENTS; i++)
@@ -94,7 +97,7 @@ inline float SERVER_STORE_()
   {
     SERVER_STORE_LAST_EXECUTE = millis();
 
-    if (SERVER_STORE_TOTAL_DISCHARGED_FOR_CLEAR <= abs(SERVER_STORE_TOTAL_DISCHARGED.GET()) )
+    if ((SERVER_STORE_TOTAL_FOR_CLEAR <= abs(SERVER_STORE_TOTAL_DISCHARGED.GET())) || (SERVER_STORE_TOTAL_FOR_CLEAR <= abs(SERVER_STORE_TOTAL_CHARGED.GET())))
     {
       SERVER_STORE_TOTAL_DISCHARGED = FLOAT_FLOAT(0.0f);
       for (uint8_t i = 0; i < MAX_CLIENTS; i++)
@@ -149,10 +152,13 @@ inline float SERVER_STORE_VOLTS()
     {
       if (SERVER_STORE_CLIENT_VOLTS[i] > MERIX_NOT_AVAILABLE)
       {
-        if (SERVER_STORE_CLIENT_INCLUDE[i] > 0)
+        if ((SERVER_STORE_CLIENT_TYPE[i] == 0) || (SERVER_STORE_CLIENT_TYPE[i] == 1) || (SERVER_STORE_CLIENT_TYPE[i] == 2))
         {
-          count++;
-          ret += SERVER_STORE_CLIENT_VOLTS[i];
+          if (SERVER_STORE_CLIENT_INCLUDE[i] > 0)
+          {
+            count++;
+            ret += SERVER_STORE_CLIENT_VOLTS[i];
+          }
         }
       }
     }
@@ -177,11 +183,14 @@ inline float SERVER_STORE_AMPS()
     {
       if (SERVER_STORE_CLIENT_AMPS[i] > MERIX_NOT_AVAILABLE)
       {
-        if (SERVER_STORE_CLIENT_INCLUDE[i] > 0)
+        if ((SERVER_STORE_CLIENT_TYPE[i] == 0) || (SERVER_STORE_CLIENT_TYPE[i] == 1) || (SERVER_STORE_CLIENT_TYPE[i] == 3) || (SERVER_STORE_CLIENT_TYPE[i] == 4))
         {
-          count++;
-          ret += SERVER_STORE_CLIENT_AMPS[i];
+          if (SERVER_STORE_CLIENT_INCLUDE[i] > 0)
+          {
+            count++;
+            ret += SERVER_STORE_CLIENT_AMPS[i];
 
+          }
         }
       }
     }
@@ -198,20 +207,23 @@ inline float SERVER_STORE_AMPS()
 inline void SERVER_STORE_PROCESS_DATA(uint16_t id, float amps, float volts, uint8_t seq, FLOAT_FLOAT ah)
 {
 
-  //amps *= 3.8f;
-
   for (uint8_t i = 0; i < MAX_CLIENTS; i++)
   {
     if (SERVER_STORE_CLIENT_ID[i] == id)
     {
+
       SERVER_STORE_CLIENT_SEQ[i] = seq;
       SERVER_STORE_CLIENT_VOLTS[i] = volts;
       SERVER_STORE_CLIENT_AMPS[i] = (abs(amps) < CLIENT_MIN_CONSUMPTION) ? 0.0f : amps;
 
-      if ((ah.GET() < 0) && (ah.GET() > MERIX_NOT_AVAILABLE))
+      if ((SERVER_STORE_CLIENT_INCLUDE[i] > 0) && ((ah.GET() < 0) && (ah.GET() > MERIX_NOT_AVAILABLE)))
       {
         SERVER_STORE_TOTAL_DISCHARGED.ADD(ah);
         SERVER_STORE_TOTAL_PER_CLIENT[i].ADD(ah);
+      }
+      else
+      {
+        SERVER_STORE_TOTAL_CHARGED.ADD(ah);
       }
 
       if (!SERVER_STORE_INITIALIZED)
@@ -223,20 +235,26 @@ inline void SERVER_STORE_PROCESS_DATA(uint16_t id, float amps, float volts, uint
           {
             if (SERVER_STORE_CLIENT_INCLUDE[i] > 0)
             {
-              if (SERVER_STORE_CLIENT_VOLTS[j] <= MERIX_NOT_AVAILABLE)
+              if ((SERVER_STORE_CLIENT_TYPE[i] == 0) || (SERVER_STORE_CLIENT_TYPE[i] == 1) || (SERVER_STORE_CLIENT_TYPE[i] == 2))
               {
-                data_available = false;
-                break;
+                if (SERVER_STORE_CLIENT_VOLTS[j] <= MERIX_NOT_AVAILABLE)
+                {
+                  data_available = false;
+                  break;
+                }
               }
-              if (SERVER_STORE_CLIENT_AMPS[j] <= MERIX_NOT_AVAILABLE)
+              if ((SERVER_STORE_CLIENT_TYPE[i] == 0) || (SERVER_STORE_CLIENT_TYPE[i] == 1) || (SERVER_STORE_CLIENT_TYPE[i] == 3) || (SERVER_STORE_CLIENT_TYPE[i] == 4))
               {
-                data_available = false;
-                break;
+                if (SERVER_STORE_CLIENT_AMPS[j] <= MERIX_NOT_AVAILABLE)
+                {
+                  data_available = false;
+                  break;
+                }
               }
             }
           }
         }
-        
+
         if (data_available)
         {
           float server_volts = SERVER_STORE_VOLTS();

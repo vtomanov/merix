@@ -581,6 +581,10 @@ inline void SERVER_DISPLAY_()
         n += (SERVER_STORE_CLIENT_SEQ[SERVER_DISPLAY_INDEX] % 10);
         SERVER_DISPLAY_PRINT(0, 2, n);
 
+        LOG64_SET("DISP:");
+        LOG64_SET(SERVER_STORE_CLIENT_TYPE[SERVER_DISPLAY_INDEX]);
+        LOG64_NEW_LINE;
+        
         if ((SERVER_STORE_CLIENT_TYPE[SERVER_DISPLAY_INDEX] != 3) && (SERVER_STORE_CLIENT_TYPE[SERVER_DISPLAY_INDEX] != 4))
         {
           String v = (SERVER_STORE_CLIENT_VOLTS[SERVER_DISPLAY_INDEX] <= 0) ? String(F("--.--")) : String(SERVER_STORE_CLIENT_VOLTS[SERVER_DISPLAY_INDEX] , 2);
@@ -593,7 +597,7 @@ inline void SERVER_DISPLAY_()
         }
         else
         {
-          SERVER_DISPLAY_PRINT(6, 3, String(F("      ")));
+          SERVER_DISPLAY_PRINT(0, 3, String(F("      ")));
         }
 
         if (SERVER_STORE_CLIENT_TYPE[SERVER_DISPLAY_INDEX] != 2)
@@ -698,16 +702,16 @@ inline void SERVER_DISPLAY_REFRESH(float amps, float volts, uint8_t percent, flo
     SERVER_DISPLAY_TIME_TYPE = 1;
   }
 
-  //  LOG64_SET(F("DISPLAY: REFRESH: AMPS["));
-  //  LOG64_SET(amps);
-  //  LOG64_SET(F("] VOLTS["));
-  //  LOG64_SET(volts);
-  //  LOG64_SET(F("] %["));
-  //  LOG64_SET(percent);
-  //  LOG64_SET(F("] AH["));
-  //  LOG64_SET(ah_available);
-  //  LOG64_SET(F("] 24["));
-  //  LOG64_NEW_LINE;
+    LOG64_SET(F("DISPLAY: REFRESH: AMPS["));
+    LOG64_SET(amps);
+    LOG64_SET(F("] VOLTS["));
+    LOG64_SET(volts);
+    LOG64_SET(F("] %["));
+    LOG64_SET(percent);
+    LOG64_SET(F("] AH["));
+    LOG64_SET(ah_available);
+    LOG64_SET(F("] 24["));
+    LOG64_NEW_LINE;
 
   float l24 = 0.0f;
   for (int i = 0; i < 24; i++)

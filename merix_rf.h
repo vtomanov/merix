@@ -36,8 +36,8 @@ RH_NRF24 RF_DRIVER;
 #endif
 
 #define RF_BROADCAST_ADDRESS RH_BROADCAST_ADDRESS
-#define RH_RETRANSMIT_COUNT 5
-#define RF_HARD_RETRANSMIT_COUNT 5
+#define RH_RETRANSMIT_COUNT 2
+#define RF_HARD_RETRANSMIT_COUNT 2
 #define RF_HARD_RETRANSMIT_DELAY 5
 
 #if not defined(RF_NETWORK_SIMULATION)
@@ -394,6 +394,7 @@ inline void RF_PROCESS(OPER_PACKET  & oper_packet, uint8_t oper)
             SERVER_STORE_CLIENT_SLAVE[i] = oper_packet.handshake_packet.slave;
             SERVER_STORE_CLIENT_INCLUDE[i] = oper_packet.handshake_packet.include;
             SERVER_STORE_CLIENT_TYPE[i] = oper_packet.handshake_packet.type;
+            SERVER_STORE_CLIENT_INDEX[i] = oper_packet.handshake_packet.index;
             strcpy(SERVER_STORE_CLIENT_NAME[i], oper_packet.handshake_packet.name);
 
             //            LOG64_SET(F("RF: PROCESSING:  OPER_HANDSHAKE INDEX: "));
