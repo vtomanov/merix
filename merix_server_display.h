@@ -42,6 +42,7 @@ char SERVER_DISPLAY_SIMULATION_CACHE[4][21];
 
 
 LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE); // Set the LCD I2C address
+
 #endif
 
 #define SERVER_DISPLAY_REFRESH_TIMEOUT  1000
@@ -227,6 +228,7 @@ inline void SERVER_DISPLAY_RESET()
   LOG64_NEW_LINE;
 }
 
+
 inline void SERVER_DISPLAY_INIT()
 {
 #if not defined(SERVER_DISPLAY_SIMULATION)
@@ -234,6 +236,7 @@ inline void SERVER_DISPLAY_INIT()
 
   lcd.begin(20, 4);              // initialize the lcd
   lcd.home();                    // go home
+
 #endif
 
   SERVER_DISPLAY_RESET();
@@ -581,10 +584,6 @@ inline void SERVER_DISPLAY_()
         n += (SERVER_STORE_CLIENT_SEQ[SERVER_DISPLAY_INDEX] % 10);
         SERVER_DISPLAY_PRINT(0, 2, n);
 
-        LOG64_SET("DISP:");
-        LOG64_SET(SERVER_STORE_CLIENT_TYPE[SERVER_DISPLAY_INDEX]);
-        LOG64_NEW_LINE;
-        
         if ((SERVER_STORE_CLIENT_TYPE[SERVER_DISPLAY_INDEX] != 3) && (SERVER_STORE_CLIENT_TYPE[SERVER_DISPLAY_INDEX] != 4))
         {
           String v = (SERVER_STORE_CLIENT_VOLTS[SERVER_DISPLAY_INDEX] <= 0) ? String(F("--.--")) : String(SERVER_STORE_CLIENT_VOLTS[SERVER_DISPLAY_INDEX] , 2);
@@ -618,18 +617,41 @@ inline void SERVER_DISPLAY_()
         if ((SERVER_STORE_CLIENT_TYPE[SERVER_DISPLAY_INDEX] == 0) || (SERVER_STORE_CLIENT_TYPE[SERVER_DISPLAY_INDEX] == 4))
         {
           FLOAT_FLOAT percent_total = SERVER_STORE_TOTAL_PER_CLIENT[SERVER_DISPLAY_INDEX];
-          if ((SERVER_STORE_TOTAL_DISCHARGED.GET() == 0.0f) && (SERVER_STORE_TOTAL_DISCHARGED.GET_LO() == 0.0f))
+
+          String p;
+
+          if (percent_total.GET() < 0.0f)
           {
-            percent_total = FLOAT_FLOAT(100.0f);
+            if ((SERVER_STORE_TOTAL_DISCHARGED.GET() == 0.0f) && (SERVER_STORE_TOTAL_DISCHARGED.GET_LO() == 0.0f))
+            {
+              percent_total = FLOAT_FLOAT(0.0f);
+            }
+            else
+            {
+              percent_total.DIV(SERVER_STORE_TOTAL_DISCHARGED);
+              percent_total.MUL(FLOAT_FLOAT(100.0f));
+            }
+
+            p = String((abs(percent_total.GET()) > 100.0f) ? (uint8_t)100 : (uint8_t)round(abs(percent_total.GET())));
+            p += '<';
           }
           else
           {
-            percent_total.DIV(SERVER_STORE_TOTAL_DISCHARGED);
-            percent_total.MUL(FLOAT_FLOAT(100.0f));
+            if ((SERVER_STORE_TOTAL_CHARGED.GET() == 0.0f) && (SERVER_STORE_TOTAL_CHARGED.GET_LO() == 0.0f))
+            {
+              percent_total = FLOAT_FLOAT(0.0f);
+            }
+            else
+            {
+              percent_total.DIV(SERVER_STORE_TOTAL_CHARGED);
+              percent_total.MUL(FLOAT_FLOAT(100.0f));
+            }
+
+            p = String((abs(percent_total.GET()) > 100.0f) ? (uint8_t)100 : (uint8_t)round(abs(percent_total.GET())));
+            p += '>';
           }
 
-          String p = String((abs(percent_total.GET()) > 100.0f) ? (uint8_t)100 : (uint8_t)round(abs(percent_total.GET())));
-          p += '%';
+
           for (; p.length() < 5; )
           {
             p = ' ' + p;
@@ -702,16 +724,14 @@ inline void SERVER_DISPLAY_REFRESH(float amps, float volts, uint8_t percent, flo
     SERVER_DISPLAY_TIME_TYPE = 1;
   }
 
-    LOG64_SET(F("DISPLAY: REFRESH: AMPS["));
-    LOG64_SET(amps);
-    LOG64_SET(F("] VOLTS["));
-    LOG64_SET(volts);
-    LOG64_SET(F("] %["));
-    LOG64_SET(percent);
-    LOG64_SET(F("] AH["));
-    LOG64_SET(ah_available);
-    LOG64_SET(F("] 24["));
-    LOG64_NEW_LINE;
+  //  LOG64_SET(F("DISPLAY: REFRESH: AMPS["));
+  //  LOG64_SET(amps);
+  //  LOG64_SET(F("] VOLTS["));
+  //  LOG64_SET(volts);
+  //  LOG64_SET(F("] %["));
+  //  LOG64_SET(percent);
+  //  LOG64_SET(F("] AH["));
+  //  LOG64_SET(ah_available);
 
   float l24 = 0.0f;
   for (int i = 0; i < 24; i++)

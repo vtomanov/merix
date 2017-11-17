@@ -207,6 +207,10 @@ inline float SERVER_STORE_AMPS()
 inline void SERVER_STORE_PROCESS_DATA(uint16_t id, float amps, float volts, uint8_t seq, FLOAT_FLOAT ah)
 {
 
+  LOG64_SET(F("SERVER_STORE: PROCESS_DATA: AH["));
+  LOG64_SET(ah.GET());
+  LOG64_NEW_LINE;
+
   for (uint8_t i = 0; i < MAX_CLIENTS; i++)
   {
     if (SERVER_STORE_CLIENT_ID[i] == id)
@@ -216,14 +220,21 @@ inline void SERVER_STORE_PROCESS_DATA(uint16_t id, float amps, float volts, uint
       SERVER_STORE_CLIENT_VOLTS[i] = volts;
       SERVER_STORE_CLIENT_AMPS[i] = (abs(amps) < CLIENT_MIN_CONSUMPTION) ? 0.0f : amps;
 
-      if ((SERVER_STORE_CLIENT_INCLUDE[i] > 0) && ((ah.GET() < 0) && (ah.GET() > MERIX_NOT_AVAILABLE)))
+      if (((SERVER_STORE_CLIENT_TYPE[i] == 0) || (SERVER_STORE_CLIENT_TYPE[i] == 4)) && (ah.GET() > MERIX_NOT_AVAILABLE))
       {
-        SERVER_STORE_TOTAL_DISCHARGED.ADD(ah);
+        if (SERVER_STORE_CLIENT_INCLUDE[i] > 0)
+        {
+          if (ah.GET() < 0)
+          {
+            SERVER_STORE_TOTAL_DISCHARGED.ADD(ah);
+          }
+          else
+          {
+            SERVER_STORE_TOTAL_CHARGED.ADD(ah);
+          }
+        }
+
         SERVER_STORE_TOTAL_PER_CLIENT[i].ADD(ah);
-      }
-      else
-      {
-        SERVER_STORE_TOTAL_CHARGED.ADD(ah);
       }
 
       if (!SERVER_STORE_INITIALIZED)
