@@ -24,14 +24,61 @@ GENERICS:
 CONFIGURATIONS
 
 ---------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 - Server (Arduino MEGA)
 
 //#define MODULE_IS_CLIENT
 #define MODULE_IS_SERVER
 
 ---------------------------------------------------
-- H_Bank(2) - BOW ( Arduino UNO)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+- Watermaker ( Arduino UNO)
 
+#define MODULE_IS_CLIENT
+//#define MODULE_IS_SERVER
+
+//#define MODULE_SLAVE_ENABLED
+//#define MODULE_SLAVE_SLAVE_ENABLED
+
+#define MODULE_NAME F("WATERMAKER")
+
+#define MODULE_INCLUDE 0
+#define MODULE_TYPE 4
+#define MODULE_DISPLAY_TYPE 0
+
+#define MODULE_HANDSHAKE_DELAY_INDEX 2
+
+
+---------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+- H_Bank(1) - STERN / STARTER BAT / SOL/WIND ( Arduino UNO)
+
+#if defined(MODULE_IS_CLIENT)
+
+#define MODULE_SLAVE_ENABLED
+#define MODULE_SLAVE_SLAVE_ENABLED
+
+#define MODULE_NAME F("HOUSE")
+#define MODULE_SLAVE_NAME F("START BATTERY")
+#define MODULE_SLAVE_SLAVE_NAME F("SOLAR/WIND")
+
+#define MODULE_INCLUDE 1
+#define MODULE_TYPE 0
+#define MODULE_DISPLAY_TYPE 0
+
+#define MODULE_SLAVE_INCLUDE 0
+#define MODULE_SLAVE_TYPE 2
+#define MODULE_SLAVE_DISPLAY_TYPE 0
+
+#define MODULE_SLAVE_SLAVE_INCLUDE 1
+#define MODULE_SLAVE_SLAVE_TYPE 4
+#define MODULE_SLAVE_SLAVE_DISPLAY_TYPE 1
+
+#define MODULE_HANDSHAKE_DELAY_INDEX 1
+
+---------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+- H_Bank(2) - BOW ( Arduino UNO)
 
 #define MODULE_IS_CLIENT
 //#define MODULE_IS_SERVER
@@ -39,17 +86,15 @@ CONFIGURATIONS
 #define MODULE_SLAVE_ENABLED
 //#define MODULE_SLAVE_SLAVE_ENABLED
 
-#define MODULE_NAME F("INVERTER")
-#define MODULE_SLAVE_NAME F("BOW THRUSTER")
+#define MODULE_NAME F("BOW THRUSTER")
+#define MODULE_SLAVE_NAME F("INVERTOR")
 
 #define MODULE_INCLUDE 1
 #define MODULE_TYPE 0
 #define MODULE_DISPLAY_TYPE 0
-
 #define MODULE_SLAVE_INCLUDE 1
 #define MODULE_SLAVE_TYPE 0
 #define MODULE_SLAVE_DISPLAY_TYPE 0
-
 #define MODULE_HANDSHAKE_DELAY_INDEX 3
 
 #define CLIENT_AMPERMETER_PIN A0

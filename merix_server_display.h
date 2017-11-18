@@ -618,15 +618,19 @@ inline void SERVER_DISPLAY_()
         {
           FLOAT_FLOAT percent_total = SERVER_STORE_TOTAL_PER_CLIENT[SERVER_DISPLAY_INDEX];
           
-          LOG64_SET(F("DISPLAY: REFRESH: CLIENT["));
-          LOG64_SET(SERVER_STORE_CLIENT_NAME[SERVER_DISPLAY_INDEX]);
-          LOG64_SET(F("] TOTAL_CLIENT["));
-          LOG64_SET(percent_total.GET());
-          LOG64_SET(F("] TOTAL_CHARGE["));
-          LOG64_SET(SERVER_STORE_TOTAL_CHARGED.GET());
-          LOG64_SET(F("] TOTAL_DISCHARGE["));
-          LOG64_SET(SERVER_STORE_TOTAL_DISCHARGED.GET());
-          LOG64_NEW_LINE;
+//          LOG64_SET(F("DISPLAY: REFRESH: CLIENT["));
+//          LOG64_SET(SERVER_STORE_CLIENT_NAME[SERVER_DISPLAY_INDEX]);
+//          LOG64_SET(F("] TOTAL_CLIENT["));
+//          LOG64_SET(percent_total.GET());
+//          LOG64_SET(percent_total.GET_LO());
+//          LOG64_SET(F("] TOTAL_CHARGE["));
+//          LOG64_SET(SERVER_STORE_TOTAL_CHARGED.GET());
+//          LOG64_SET(SERVER_STORE_TOTAL_CHARGED.GET_LO());
+//          LOG64_SET(F("] TOTAL_DISCHARGE["));
+//          LOG64_SET(SERVER_STORE_TOTAL_DISCHARGED.GET());
+//          LOG64_SET(SERVER_STORE_TOTAL_DISCHARGED.GET_LO());
+//          LOG64_SET(F("]"));
+//          LOG64_NEW_LINE;
           
           String p;
 

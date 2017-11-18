@@ -70,7 +70,7 @@ inline void ID_REINIT()
   ID_SLAVE_ID = (uint16_t)random(0xFFFFE);
   EEPROM.put(EEPROM_ADDRESS_SLAVE_ID, ID_SLAVE_ID);
 #endif
-#if defined(MODULE_SLAVE_ENABLED)
+#if defined(MODULE_SLAVE_SLAVE_ENABLED)
   ID_SLAVE_SLAVE_ID = (uint16_t)random(0xFFFFE);
   EEPROM.put(EEPROM_ADDRESS_SLAVE_SLAVE_ID, ID_SLAVE_SLAVE_ID);
 #endif
@@ -272,7 +272,7 @@ inline void ID_GET_HANDSHAKE_PACKET(uint8_t buf[], uint8_t & size, uint8_t slave
     LOG64_NEW_LINE;
   }
 #endif
-#if defined(MODULE_SLAVE_ENABLED)
+#if defined(MODULE_SLAVE_SLAVE_ENABLED)
   else if (slave == 2)
   {
     buf[size++] = ((uint8_t*)&ID_SLAVE_SLAVE_ID)[0];

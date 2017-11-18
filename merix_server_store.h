@@ -213,33 +213,52 @@ inline void SERVER_STORE_PROCESS_DATA(uint16_t id, float amps, float volts, uint
     if (SERVER_STORE_CLIENT_ID[i] == id)
     {
 
+//      LOG64_SET(F("SERVER_STORE: PROCESS_DATA: LINET FOUND:  AMPS["));
+//      LOG64_SET(amps);
+//      LOG64_SET(F("] VOLTS["));
+//      LOG64_SET(volts);
+//      LOG64_SET(F("] AH["));
+//      LOG64_SET(ah.GET());
+//      LOG64_SET(ah.GET_LO());
+//      LOG64_SET(F("]"));
+//      LOG64_NEW_LINE;
+
       SERVER_STORE_CLIENT_SEQ[i] = seq;
       SERVER_STORE_CLIENT_VOLTS[i] = volts;
       SERVER_STORE_CLIENT_AMPS[i] = (abs(amps) < CLIENT_MIN_CONSUMPTION) ? 0.0f : amps;
 
       if (((SERVER_STORE_CLIENT_TYPE[i] == 0) || (SERVER_STORE_CLIENT_TYPE[i] == 4)) && (ah.GET() > MERIX_NOT_AVAILABLE))
       {
-        if (SERVER_STORE_CLIENT_INCLUDE[i] > 0)
+
+        if (ah.GET() < 0)
         {
-          if (ah.GET() < 0)
+          // do we need to include it 
+          if (SERVER_STORE_CLIENT_INCLUDE[i] > 0)
           {
             SERVER_STORE_TOTAL_DISCHARGED.ADD(ah);
-            // check for consumer
-            if (SERVER_STORE_CLIENT_DISPLAY[i] == 0)
-            {
-              SERVER_STORE_TOTAL_PER_CLIENT[i].ADD(ah);
-            }
           }
-          else
+          
+          // check for consumer
+          if (SERVER_STORE_CLIENT_DISPLAY[i] == 0)
           {
-            SERVER_STORE_TOTAL_CHARGED.ADD(ah);
-            // ckeck for producer
-            if (SERVER_STORE_CLIENT_DISPLAY[i] == 1)
-            {
-              SERVER_STORE_TOTAL_PER_CLIENT[i].ADD(ah);
-            }
+            SERVER_STORE_TOTAL_PER_CLIENT[i].ADD(ah);
           }
         }
+        else
+        {
+          // do we need to include it 
+          if (SERVER_STORE_CLIENT_INCLUDE[i] > 0)
+          {
+            SERVER_STORE_TOTAL_CHARGED.ADD(ah);
+          }
+          
+          // ckeck for producer
+          if (SERVER_STORE_CLIENT_DISPLAY[i] == 1)
+          {
+            SERVER_STORE_TOTAL_PER_CLIENT[i].ADD(ah);
+          }
+        }
+
       }
 
       if (!SERVER_STORE_INITIALIZED)
