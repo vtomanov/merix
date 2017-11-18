@@ -213,15 +213,15 @@ inline void SERVER_STORE_PROCESS_DATA(uint16_t id, float amps, float volts, uint
     if (SERVER_STORE_CLIENT_ID[i] == id)
     {
 
-//      LOG64_SET(F("SERVER_STORE: PROCESS_DATA: LINET FOUND:  AMPS["));
-//      LOG64_SET(amps);
-//      LOG64_SET(F("] VOLTS["));
-//      LOG64_SET(volts);
-//      LOG64_SET(F("] AH["));
-//      LOG64_SET(ah.GET());
-//      LOG64_SET(ah.GET_LO());
-//      LOG64_SET(F("]"));
-//      LOG64_NEW_LINE;
+      //      LOG64_SET(F("SERVER_STORE: PROCESS_DATA: LINET FOUND:  AMPS["));
+      //      LOG64_SET(amps);
+      //      LOG64_SET(F("] VOLTS["));
+      //      LOG64_SET(volts);
+      //      LOG64_SET(F("] AH["));
+      //      LOG64_SET(ah.GET());
+      //      LOG64_SET(ah.GET_LO());
+      //      LOG64_SET(F("]"));
+      //      LOG64_NEW_LINE;
 
       SERVER_STORE_CLIENT_SEQ[i] = seq;
       SERVER_STORE_CLIENT_VOLTS[i] = volts;
@@ -232,12 +232,12 @@ inline void SERVER_STORE_PROCESS_DATA(uint16_t id, float amps, float volts, uint
 
         if (ah.GET() < 0)
         {
-          // do we need to include it 
+          // do we need to include it
           if (SERVER_STORE_CLIENT_INCLUDE[i] > 0)
           {
             SERVER_STORE_TOTAL_DISCHARGED.ADD(ah);
           }
-          
+
           // check for consumer
           if (SERVER_STORE_CLIENT_DISPLAY[i] == 0)
           {
@@ -246,12 +246,12 @@ inline void SERVER_STORE_PROCESS_DATA(uint16_t id, float amps, float volts, uint
         }
         else
         {
-          // do we need to include it 
+          // do we need to include it
           if (SERVER_STORE_CLIENT_INCLUDE[i] > 0)
           {
             SERVER_STORE_TOTAL_CHARGED.ADD(ah);
           }
-          
+
           // ckeck for producer
           if (SERVER_STORE_CLIENT_DISPLAY[i] == 1)
           {
@@ -263,26 +263,42 @@ inline void SERVER_STORE_PROCESS_DATA(uint16_t id, float amps, float volts, uint
 
       if (!SERVER_STORE_INITIALIZED)
       {
-        bool data_available = true;
+        bool first_amps = true;
+        bool amps_available = false;
+        bool first_volts = true;
+        bool volts_available = false;
+
         for (uint8_t j = 0; j < MAX_CLIENTS; j++)
         {
           if (SERVER_STORE_CLIENT_ID[j] != 0xFFFF)
           {
-            if (SERVER_STORE_CLIENT_INCLUDE[i] > 0)
+
+            if (SERVER_STORE_CLIENT_INCLUDE[j] > 0)
             {
-              if ((SERVER_STORE_CLIENT_TYPE[i] == 0) || (SERVER_STORE_CLIENT_TYPE[i] == 1) || (SERVER_STORE_CLIENT_TYPE[i] == 2))
+
+              if ((SERVER_STORE_CLIENT_TYPE[j] == 0) || (SERVER_STORE_CLIENT_TYPE[j] == 1) || (SERVER_STORE_CLIENT_TYPE[j] == 2))
               {
+                if (first_volts)
+                {
+                  first_volts = false;
+                  volts_available = true;
+                }
                 if (SERVER_STORE_CLIENT_VOLTS[j] <= MERIX_NOT_AVAILABLE)
                 {
-                  data_available = false;
+                  volts_available = false;
                   break;
                 }
               }
-              if ((SERVER_STORE_CLIENT_TYPE[i] == 0) || (SERVER_STORE_CLIENT_TYPE[i] == 1) || (SERVER_STORE_CLIENT_TYPE[i] == 3) || (SERVER_STORE_CLIENT_TYPE[i] == 4))
+              if ((SERVER_STORE_CLIENT_TYPE[j] == 0) || (SERVER_STORE_CLIENT_TYPE[j] == 1) || (SERVER_STORE_CLIENT_TYPE[j] == 3) || (SERVER_STORE_CLIENT_TYPE[j] == 4))
               {
+                if (first_amps)
+                {
+                  first_amps = false;
+                  amps_available = true;
+                }
                 if (SERVER_STORE_CLIENT_AMPS[j] <= MERIX_NOT_AVAILABLE)
                 {
-                  data_available = false;
+                  amps_available = false;
                   break;
                 }
               }
@@ -290,7 +306,7 @@ inline void SERVER_STORE_PROCESS_DATA(uint16_t id, float amps, float volts, uint
           }
         }
 
-        if (data_available)
+        if (amps_available && volts_available)
         {
           float server_volts = SERVER_STORE_VOLTS();
           float server_amps = SERVER_STORE_AMPS();
@@ -310,6 +326,10 @@ inline void SERVER_STORE_PROCESS_DATA(uint16_t id, float amps, float volts, uint
           LOG64_SET(SERVER_STORE_AH.GET());
           LOG64_SET(F("]"));
           LOG64_NEW_LINE;
+        }
+        else
+        {
+
         }
         return;
       }
