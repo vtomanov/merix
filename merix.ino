@@ -177,7 +177,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 // PLEASE SET VERSION and REVISION HERE
 
-#define Version_Major_Minor_Revision F("Ver.#0.0.385")
+#define Version_Major_Minor_Revision F("Ver.#0.0.388")
 
 //////////////////////////////////////////////////////////////////////////////////
 // PLEASE SET MODULE NAME e.g. Main Consumers, Bow Thruster, Inverter, Watermaker ( name can be max 18 symbols)
@@ -185,14 +185,21 @@
 #if defined(MODULE_IS_CLIENT)
 
 // if slave is enabled - make sure you have set : MODULE_SLAVE_NAME, MODULE_SLAVE_INCLUDE, MODULE_SLAVE_INDEX ( expected to be MODULE_HANDSHAKE_DELAY_INDEX + 1)
-#define MODULE_SLAVE_ENABLED
+//#define MODULE_SLAVE_ENABLED
+//#define MODULE_SLAVE_SLAVE_ENABLED
 
 //                     123456789012345
 #define MODULE_NAME F("HOUSE CONSUMERS")
 
 
 #if defined(MODULE_SLAVE_ENABLED)
+//                           123456789012345
 #define MODULE_SLAVE_NAME F("START BATTERY")
+#endif
+
+#if defined(MODULE_SLAVE_SLAVE_ENABLED)
+//                                 123456789012345
+#define MODULE_SLAVE_SLAVE_NAME F("SOLAR/WIND")
 #endif
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -208,6 +215,12 @@
 #define MODULE_SLAVE_INCLUDE 0
 #define MODULE_SLAVE_TYPE 2
 #define MODULE_SLAVE_DISPLAY_TYPE 0
+#endif
+
+#if defined(MODULE_SLAVE_SLAVE_ENABLED)
+#define MODULE_SLAVE_SLAVE_INCLUDE 1
+#define MODULE_SLAVE_SLAVE_TYPE 4
+#define MODULE_SLAVE_SLAVE_DISPLAY_TYPE 1
 #endif
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -332,6 +345,8 @@ inline void MONITOR_DOWN()
 #include "merix_client_ampermeter.h"
 #include "merix_client_voltmeter_slave.h"
 #include "merix_client_ampermeter_slave.h"
+#include "merix_client_voltmeter_slave_slave.h"
+#include "merix_client_ampermeter_slave_slave.h"
 #include "merix_client_sensors.h"
 #include "merix_rf.h"
 #include "merix_server_reset.h"
@@ -469,7 +484,7 @@ void loop()
           }
 
           for (;
-               ((SERVER_STORE_CLIENT_ID[SERVER_STORE_DATA_REQUEST_INDEX] == 0xFFFF) || (SERVER_STORE_CLIENT_SLAVE[SERVER_STORE_DATA_REQUEST_INDEX] == 1))  && (SERVER_STORE_DATA_REQUEST_INDEX < MAX_CLIENTS);
+               ((SERVER_STORE_CLIENT_ID[SERVER_STORE_DATA_REQUEST_INDEX] == 0xFFFF) || (SERVER_STORE_CLIENT_SLAVE[SERVER_STORE_DATA_REQUEST_INDEX] != 0))  && (SERVER_STORE_DATA_REQUEST_INDEX < MAX_CLIENTS);
                SERVER_STORE_DATA_REQUEST_INDEX++);
 
 

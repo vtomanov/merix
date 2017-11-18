@@ -21,6 +21,9 @@ uint16_t ID_ID;
 #if defined(MODULE_SLAVE_ENABLED)
 uint16_t ID_SLAVE_ID;
 #endif
+#if defined(MODULE_SLAVE_SLAVE_ENABLED)
+uint16_t ID_SLAVE_SLAVE_ID;
+#endif
 uint16_t ID_SERVER_ID;
 
 #if defined(MODULE_IS_CLIENT)
@@ -67,6 +70,10 @@ inline void ID_REINIT()
   ID_SLAVE_ID = (uint16_t)random(0xFFFFE);
   EEPROM.put(EEPROM_ADDRESS_SLAVE_ID, ID_SLAVE_ID);
 #endif
+#if defined(MODULE_SLAVE_ENABLED)
+  ID_SLAVE_SLAVE_ID = (uint16_t)random(0xFFFFE);
+  EEPROM.put(EEPROM_ADDRESS_SLAVE_SLAVE_ID, ID_SLAVE_SLAVE_ID);
+#endif
 #if defined(MODULE_IS_CLIENT)
   ID_SET_SERVER_ID(0xFFFF);
 #endif
@@ -81,10 +88,12 @@ inline void ID_REINIT()
 
 inline void ID_INIT()
 {
-
   EEPROM.get(EEPROM_ADDRESS_ID, ID_ID);
 #if defined(MODULE_SLAVE_ENABLED)
   EEPROM.get(EEPROM_ADDRESS_SLAVE_ID, ID_SLAVE_ID);
+#endif
+#if defined(MODULE_SLAVE_SLAVE_ENABLED)
+  EEPROM.get(EEPROM_ADDRESS_SLAVE_SLAVE_ID, ID_SLAVE_SLAVE_ID);
 #endif
   EEPROM.get(EEPROM_ADDRESS_SERVER_ID, ID_SERVER_ID);
 
@@ -105,6 +114,10 @@ inline void ID_INIT()
 #if defined(MODULE_SLAVE_ENABLED)
   LOG64_SET(F("] SLAVE_ID["));
   LOG64_SET(ID_SLAVE_ID);
+#endif
+#if defined(MODULE_SLAVE_SLAVE_ENABLED)
+  LOG64_SET(F("] SLAVE_SLAVE_ID["));
+  LOG64_SET(ID_SLAVE_SLAVE_ID);
 #endif
 #if defined(MODULE_IS_CLIENT)
   LOG64_SET(F("] DELAY["));
@@ -225,7 +238,7 @@ inline void ID_GET_HANDSHAKE_PACKET(uint8_t buf[], uint8_t & size, uint8_t slave
     LOG64_NEW_LINE;
   }
 #if defined(MODULE_SLAVE_ENABLED)
-  else
+  else if (slave ==1)
   {
     buf[size++] = ((uint8_t*)&ID_SLAVE_ID)[0];
     buf[size++] = ((uint8_t*)&ID_SLAVE_ID)[1];
@@ -255,6 +268,41 @@ inline void ID_GET_HANDSHAKE_PACKET(uint8_t buf[], uint8_t & size, uint8_t slave
     LOG64_SET(MODULE_SLAVE_TYPE);
     LOG64_SET(F("] NAME["));
     LOG64_SET(MODULE_SLAVE_NAME);
+    LOG64_SET(F("]"));
+    LOG64_NEW_LINE;
+  }
+#endif
+#if defined(MODULE_SLAVE_ENABLED)
+  else if (slave == 2)
+  {
+    buf[size++] = ((uint8_t*)&ID_SLAVE_SLAVE_ID)[0];
+    buf[size++] = ((uint8_t*)&ID_SLAVE_SLAVE_ID)[1];
+
+    buf[size++] = slave;
+
+    buf[size++] = MODULE_SLAVE_SLAVE_INCLUDE;
+    buf[size++] = MODULE_SLAVE_SLAVE_TYPE;
+    buf[size++] = MODULE_SLAVE_SLAVE_DISPLAY_TYPE;
+    buf[size++] = 255; // no index/address for slave
+    uint8_t len = (uint8_t)strlen_P((PGM_P)MODULE_SLAVE_SLAVE_NAME);
+    buf[size++] = len;
+    memcpy_P(& buf[size], (PGM_P)MODULE_SLAVE_SLAVE_NAME, len);
+    size += len;
+
+    LOG64_SET(F("ID: GET_HANDSHAKE_PACKET: OPER["));
+    LOG64_SET(OPER_HANDSHAKE);
+    LOG64_SET(F("] SERVER_ID["));
+    LOG64_SET(ID_SERVER_ID);
+    LOG64_SET(F("] ID["));
+    LOG64_SET(ID_SLAVE_SLAVE_ID);
+    LOG64_SET(F("] SLAVE["));
+    LOG64_SET(slave);
+    LOG64_SET(F("] INCLUDE["));
+    LOG64_SET(MODULE_SLAVE_SLAVE_INCLUDE);
+    LOG64_SET(F("] TYPE["));
+    LOG64_SET(MODULE_SLAVE_SLAVE_TYPE);
+    LOG64_SET(F("] NAME["));
+    LOG64_SET(MODULE_SLAVE_SLAVE_NAME);
     LOG64_SET(F("]"));
     LOG64_NEW_LINE;
   }
