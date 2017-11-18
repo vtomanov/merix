@@ -74,6 +74,7 @@ struct OPER_HANDSHAKE_PACKET : OPER_BASE
   uint8_t slave;
   uint8_t include;
   uint8_t type;
+  uint8_t display;
   uint8_t index; // address
   char name[21];
 };
@@ -192,6 +193,7 @@ inline uint8_t OPER_PARSE_PACKET(uint8_t buf[], OPER_PACKET & packet)
         packet.handshake_packet.slave = buf[pos++];
         packet.handshake_packet.include = buf[pos++];
         packet.handshake_packet.type = buf[pos++];
+        packet.handshake_packet.display = buf[pos++];
         packet.handshake_packet.index = buf[pos++];
         uint8_t len = buf[pos++];
         memcpy(&packet.handshake_packet.name[0], & buf[pos], len);
@@ -208,6 +210,8 @@ inline uint8_t OPER_PARSE_PACKET(uint8_t buf[], OPER_PACKET & packet)
         LOG64_SET(packet.handshake_packet.include);
         LOG64_SET(F("] TYPE["));
         LOG64_SET(packet.handshake_packet.type);
+        LOG64_SET(F("] DISPLAY["));
+        LOG64_SET(packet.handshake_packet.display);
         LOG64_SET(F("] INDEX["));
         LOG64_SET(packet.handshake_packet.index);
         LOG64_SET(F("] NAME["));

@@ -200,6 +200,7 @@ inline void ID_GET_HANDSHAKE_PACKET(uint8_t buf[], uint8_t & size, uint8_t slave
 
     buf[size++] = MODULE_INCLUDE;
     buf[size++] = MODULE_TYPE;
+    buf[size++] = MODULE_DISPLAY_TYPE;
     buf[size++] = MODULE_HANDSHAKE_DELAY_INDEX; // address
     uint8_t len = (uint8_t)strlen_P((PGM_P)MODULE_NAME);
     buf[size++] = len;
@@ -233,7 +234,8 @@ inline void ID_GET_HANDSHAKE_PACKET(uint8_t buf[], uint8_t & size, uint8_t slave
 
     buf[size++] = MODULE_SLAVE_INCLUDE;
     buf[size++] = MODULE_SLAVE_TYPE;
-    buf[size++] = 255; // no index/address fo slave
+    buf[size++] = MODULE_SLAVE_DISPLAY_TYPE;
+    buf[size++] = 255; // no index/address for slave
     uint8_t len = (uint8_t)strlen_P((PGM_P)MODULE_SLAVE_NAME);
     buf[size++] = len;
     memcpy_P(& buf[size], (PGM_P)MODULE_SLAVE_NAME, len);

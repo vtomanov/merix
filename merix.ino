@@ -177,7 +177,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 // PLEASE SET VERSION and REVISION HERE
 
-#define Version_Major_Minor_Revision F("Ver.#0.0.383")
+#define Version_Major_Minor_Revision F("Ver.#0.0.385")
 
 //////////////////////////////////////////////////////////////////////////////////
 // PLEASE SET MODULE NAME e.g. Main Consumers, Bow Thruster, Inverter, Watermaker ( name can be max 18 symbols)
@@ -201,19 +201,18 @@
 
 // TYPE 0 = volts and amps and ah, TYPE 1 - volts and amps, TYPE 2 - only volts, TYPE 3 ony amps, TYPE 4 amps and ah
 #define MODULE_TYPE 0
+// DISPLAY TYPE = 0 - display as consumer, INPUT TYPE = 1 - display as producer
+#define MODULE_DISPLAY_TYPE 0
 
 #if defined(MODULE_SLAVE_ENABLED)
 #define MODULE_SLAVE_INCLUDE 0
 #define MODULE_SLAVE_TYPE 2
+#define MODULE_SLAVE_DISPLAY_TYPE 0
 #endif
 
 //////////////////////////////////////////////////////////////////////////////////
 // PLEASE SET DELAY INDEX ( for every module should be differnt) for clients - Index[1-9], for server Index = 0
 #define MODULE_HANDSHAKE_DELAY_INDEX 1
-
-#if defined(MODULE_SLAVE_ENABLED)
-#define MODULE_SLAVE_INDEX 2
-#endif
 
 #endif
 

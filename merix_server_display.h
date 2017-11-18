@@ -617,10 +617,20 @@ inline void SERVER_DISPLAY_()
         if ((SERVER_STORE_CLIENT_TYPE[SERVER_DISPLAY_INDEX] == 0) || (SERVER_STORE_CLIENT_TYPE[SERVER_DISPLAY_INDEX] == 4))
         {
           FLOAT_FLOAT percent_total = SERVER_STORE_TOTAL_PER_CLIENT[SERVER_DISPLAY_INDEX];
-
+          
+          LOG64_SET(F("DISPLAY: REFRESH: CLIENT["));
+          LOG64_SET(SERVER_STORE_CLIENT_NAME[SERVER_DISPLAY_INDEX]);
+          LOG64_SET(F("] TOTAL_CLIENT["));
+          LOG64_SET(percent_total.GET());
+          LOG64_SET(F("] TOTAL_CHARGE["));
+          LOG64_SET(SERVER_STORE_TOTAL_CHARGED.GET());
+          LOG64_SET(F("] TOTAL_DISCHARGE["));
+          LOG64_SET(SERVER_STORE_TOTAL_DISCHARGED.GET());
+          LOG64_NEW_LINE;
+          
           String p;
 
-          if (percent_total.GET() < 0.0f)
+          if (SERVER_STORE_CLIENT_DISPLAY[SERVER_DISPLAY_INDEX] == 0)
           {
             if ((SERVER_STORE_TOTAL_DISCHARGED.GET() == 0.0f) && (SERVER_STORE_TOTAL_DISCHARGED.GET_LO() == 0.0f))
             {

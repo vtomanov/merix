@@ -394,6 +394,7 @@ inline void RF_PROCESS(OPER_PACKET  & oper_packet, uint8_t oper)
             SERVER_STORE_CLIENT_SLAVE[i] = oper_packet.handshake_packet.slave;
             SERVER_STORE_CLIENT_INCLUDE[i] = oper_packet.handshake_packet.include;
             SERVER_STORE_CLIENT_TYPE[i] = oper_packet.handshake_packet.type;
+            SERVER_STORE_CLIENT_DISPLAY[i] = oper_packet.handshake_packet.display;
             SERVER_STORE_CLIENT_INDEX[i] = oper_packet.handshake_packet.index;
             strcpy(SERVER_STORE_CLIENT_NAME[i], oper_packet.handshake_packet.name);
 

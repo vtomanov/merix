@@ -35,6 +35,7 @@ uint8_t SERVER_STORE_CLIENT_INCLUDE[MAX_CLIENTS];
 uint8_t SERVER_STORE_CLIENT_SLAVE[MAX_CLIENTS];
 uint8_t SERVER_STORE_CLIENT_TYPE[MAX_CLIENTS];
 uint8_t SERVER_STORE_CLIENT_INDEX[MAX_CLIENTS];
+uint8_t SERVER_STORE_CLIENT_DISPLAY[MAX_CLIENTS];
 uint8_t SERVER_STORE_CLIENT_SEQ[MAX_CLIENTS];
 char SERVER_STORE_CLIENT_NAME[MAX_CLIENTS][20];
 
@@ -207,10 +208,6 @@ inline float SERVER_STORE_AMPS()
 inline void SERVER_STORE_PROCESS_DATA(uint16_t id, float amps, float volts, uint8_t seq, FLOAT_FLOAT ah)
 {
 
-  LOG64_SET(F("SERVER_STORE: PROCESS_DATA: AH["));
-  LOG64_SET(ah.GET());
-  LOG64_NEW_LINE;
-
   for (uint8_t i = 0; i < MAX_CLIENTS; i++)
   {
     if (SERVER_STORE_CLIENT_ID[i] == id)
@@ -227,14 +224,22 @@ inline void SERVER_STORE_PROCESS_DATA(uint16_t id, float amps, float volts, uint
           if (ah.GET() < 0)
           {
             SERVER_STORE_TOTAL_DISCHARGED.ADD(ah);
+            // check for consumer
+            if (SERVER_STORE_CLIENT_DISPLAY[i] == 0)
+            {
+              SERVER_STORE_TOTAL_PER_CLIENT[i].ADD(ah);
+            }
           }
           else
           {
             SERVER_STORE_TOTAL_CHARGED.ADD(ah);
+            // ckeck for producer
+            if (SERVER_STORE_CLIENT_DISPLAY[i] == 1)
+            {
+              SERVER_STORE_TOTAL_PER_CLIENT[i].ADD(ah);
+            }
           }
         }
-
-        SERVER_STORE_TOTAL_PER_CLIENT[i].ADD(ah);
       }
 
       if (!SERVER_STORE_INITIALIZED)
