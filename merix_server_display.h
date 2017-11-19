@@ -738,14 +738,14 @@ inline void SERVER_DISPLAY_REFRESH(float amps, float volts, uint8_t percent, flo
     SERVER_DISPLAY_TIME_TYPE = 1;
   }
 
-  //  LOG64_SET(F("DISPLAY: REFRESH: AMPS["));
-  //  LOG64_SET(amps);
-  //  LOG64_SET(F("] VOLTS["));
-  //  LOG64_SET(volts);
-  //  LOG64_SET(F("] %["));
-  //  LOG64_SET(percent);
-  //  LOG64_SET(F("] AH["));
-  //  LOG64_SET(ah_available);
+//    LOG64_SET(F("---------------------------------------DISPLAY: REFRESH: AMPS["));
+//    LOG64_SET(amps);
+//    LOG64_SET(F("] VOLTS["));
+//    LOG64_SET(volts);
+//    LOG64_SET(F("] %["));
+//    LOG64_SET(percent);
+//    LOG64_SET(F("] AH["));
+//    LOG64_SET(ah_available);
 
   float l24 = 0.0f;
   for (int i = 0; i < 24; i++)
@@ -755,10 +755,10 @@ inline void SERVER_DISPLAY_REFRESH(float amps, float volts, uint8_t percent, flo
   }
   SERVER_DISPLAY_LAST24 = l24;
 
-  //LOG64_SET(F("] 24["));
-  //LOG64_SET(SERVER_DISPLAY_LAST24);
-  //LOG64_SET(F("]"));
-  //LOG64_NEW_LINE;
+//  LOG64_SET(F("] 24["));
+//  LOG64_SET(SERVER_DISPLAY_LAST24);
+//  LOG64_SET(F("]"));
+//  LOG64_NEW_LINE;
 
 }
 

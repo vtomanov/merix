@@ -24,7 +24,7 @@ inline uint8_t SERVER_BATTERY_DATA_FROM_VOLTAGE(float voltage);
 #define SERVER_STORE_TIMEOUT  10000
 uint32_t SERVER_STORE_LAST_EXECUTE;
 
-#define SERVER_STORE_LAST1_TIMEOUT  (60000)
+#define SERVER_STORE_LAST1_TIMEOUT  (1000 * 60 * 60)
 //(1000 * 60 * 60)
 uint32_t SERVER_STORE_LAST1_EXECUTE;
 
@@ -117,11 +117,11 @@ inline float SERVER_STORE_()
   if (DO_EXECUTE(millis(), SERVER_STORE_LAST1_EXECUTE, SERVER_STORE_LAST1_TIMEOUT))
   {
 
-    //LOG64_SET(F("STORE: CALC 24: TOTAL["));
-    //LOG64_SET(SERVER_STORE_TOTAL_DISCHARGED.GET());
-    //LOG64_SET(F("] LAST1["));
-    //LOG64_SET(SERVER_STORE_LAST1.GET());
-    //LOG64_SET(F("] 24["));
+//    LOG64_SET(F("STORE: CALC 24: TOTAL["));
+//    LOG64_SET(SERVER_STORE_TOTAL_DISCHARGED.GET());
+//    LOG64_SET(F("] LAST1["));
+//    LOG64_SET(SERVER_STORE_LAST1.GET());
+//    LOG64_SET(F("] 24["));
 
     SERVER_STORE_LAST1_EXECUTE = millis();
     memcpy(&SERVER_STORE_LAST24[0], &SERVER_STORE_LAST24[1], sizeof(SERVER_STORE_LAST24) - sizeof(float));
@@ -130,15 +130,15 @@ inline float SERVER_STORE_()
     SERVER_STORE_LAST24[23] = abs(last1.GET());
     SERVER_STORE_LAST1 = SERVER_STORE_TOTAL_DISCHARGED;
 
-    //for (int i = 0; i < 24; i++)
-    //{
-    //  LOG64_SET(SERVER_STORE_LAST24[i]);
-    //}
-
-    //LOG64_SET(F("] LAST1["));
-    //LOG64_SET(last1.GET());
-    //LOG64_SET(F("]"));
-    //LOG64_NEW_LINE;
+//    for (int i = 0; i < 24; i++)
+//    {
+//      LOG64_SET(SERVER_STORE_LAST24[i]);
+//    }
+//
+//    LOG64_SET(F("] LAST1["));
+//    LOG64_SET(last1.GET());
+//    LOG64_SET(F("]"));
+//    LOG64_NEW_LINE;
   }
 }
 

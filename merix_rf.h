@@ -36,6 +36,7 @@ RH_NRF24 RF_DRIVER;
 #endif
 
 #define RF_BROADCAST_ADDRESS RH_BROADCAST_ADDRESS
+#define RF_BROADCAST_HARD_RETRANSMIT_COUNT 5
 #define RH_RETRANSMIT_COUNT 2
 #define RF_HARD_RETRANSMIT_COUNT 2
 #define RF_HARD_RETRANSMIT_DELAY 5
@@ -136,39 +137,47 @@ inline bool RF_SEND_DATA(uint8_t buf[], uint8_t size, uint8_t to)
   }
 
 #if defined(RF_RADIO_HEAD)
-  for (uint8_t r = 0; r < RF_HARD_RETRANSMIT_COUNT; r++)
-  {
-    if (!RF_MANAGER.sendtoWait(buf, size, to))
-    {
-      LOG64_SET(F("RF: SEND : MESSAGE HAS NOT BEEN RECEIVED : SIZE["));
-      LOG64_SET(size);
-      LOG64_SET(F("] : HARD RETRANSMIT ["));
-      LOG64_SET(r);
-      LOG64_SET(F("]"));
-      LOG64_NEW_LINE;
-    }
-    else if (to != RF_BROADCAST_ADDRESS)
-    {
-      ret = true;
-      break;
-    }
-    else
-    {
-      ret = true;
-    }
 
-    delay(RF_HARD_RETRANSMIT_DELAY);
+  if (to == RF_BROADCAST_ADDRESS)
+  {
+    for (uint8_t r = 0; r < RF_BROADCAST_HARD_RETRANSMIT_COUNT; r++)
+    {
+      RF_MANAGER.resetRetransmissions();
+      RF_MANAGER.sendtoWait(buf, size, to);
+      delay(RF_HARD_RETRANSMIT_DELAY);
+    }
+  }
+  else
+  {
+    for (uint8_t r = 0; r < RF_HARD_RETRANSMIT_COUNT; r++)
+    {
+      RF_MANAGER.resetRetransmissions();
+      if (!RF_MANAGER.sendtoWait(buf, size, to))
+      {
+        LOG64_SET(F("RF: SEND : MESSAGE HAS NOT BEEN RECEIVED : SIZE["));
+        LOG64_SET(size);
+        LOG64_SET(F("] RETRIES["));
+        LOG64_SET(RF_MANAGER.retries());
+        LOG64_SET(F("] : HARD RETRANSMIT ["));
+        LOG64_SET(r);
+        LOG64_SET(F("]"));
+        LOG64_NEW_LINE;
+      }
+      else
+      {
+        ret = true;
+        break;
+      }
+
+      delay(RF_HARD_RETRANSMIT_DELAY);
+    }
   }
 #endif
 
   LOG64_SET(F("RF: SEND SIZE["));
   LOG64_SET(size);
-  LOG64_SET(F("] RETRIES["));
-  LOG64_SET(RF_MANAGER.retries());
   LOG64_SET(F("]"));
   LOG64_NEW_LINE;
-
-  RF_MANAGER.resetRetransmissions();
 
 #endif
 
@@ -575,29 +584,29 @@ inline void RF_PROCESS(OPER_PACKET  & oper_packet, uint8_t oper)
 
         CLIENT_SENSORS_GET(amps, volts, ah, volts_slave, amps_slave, ah_slave, volts_slave_slave, amps_slave_slave, ah_slave_slave);
 
-//        LOG64_SET(F("RF: SENSORS_GET : AMPS["));
-//        LOG64_SET(amps);
-//        LOG64_SET(F("] VOLTS["));
-//        LOG64_SET(volts);
-//        LOG64_SET(F("] AH["));
-//        LOG64_SET(ah.GET());
-//
-//        LOG64_SET(F("] AMPS_SLAVE["));
-//        LOG64_SET(amps_slave);
-//        LOG64_SET(F("] VOLTS_SLAVE["));
-//        LOG64_SET(volts_slave);
-//        LOG64_SET(F("] AH_SLAVE["));
-//        LOG64_SET(ah_slave.GET());
-//
-//        LOG64_SET(F("] AMPS_SLAVE_SLAVE["));
-//        LOG64_SET(amps_slave_slave);
-//        LOG64_SET(F("] VOLTS_SLAVE_SLAVE["));
-//        LOG64_SET(volts_slave_slave);
-//        LOG64_SET(F("] AH_SLAVE_SLAVE["));
-//        LOG64_SET(ah_slave_slave.GET());
-//
-//        LOG64_SET(F("]"));
-//        LOG64_NEW_LINE;
+        //        LOG64_SET(F("RF: SENSORS_GET : AMPS["));
+        //        LOG64_SET(amps);
+        //        LOG64_SET(F("] VOLTS["));
+        //        LOG64_SET(volts);
+        //        LOG64_SET(F("] AH["));
+        //        LOG64_SET(ah.GET());
+        //
+        //        LOG64_SET(F("] AMPS_SLAVE["));
+        //        LOG64_SET(amps_slave);
+        //        LOG64_SET(F("] VOLTS_SLAVE["));
+        //        LOG64_SET(volts_slave);
+        //        LOG64_SET(F("] AH_SLAVE["));
+        //        LOG64_SET(ah_slave.GET());
+        //
+        //        LOG64_SET(F("] AMPS_SLAVE_SLAVE["));
+        //        LOG64_SET(amps_slave_slave);
+        //        LOG64_SET(F("] VOLTS_SLAVE_SLAVE["));
+        //        LOG64_SET(volts_slave_slave);
+        //        LOG64_SET(F("] AH_SLAVE_SLAVE["));
+        //        LOG64_SET(ah_slave_slave.GET());
+        //
+        //        LOG64_SET(F("]"));
+        //        LOG64_NEW_LINE;
 
         ID_GET_DATA_PACKET(out_buf, out_size, amps, volts, ah);
         RF_SEND_DATA(out_buf, out_size, 0);
