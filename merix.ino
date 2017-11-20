@@ -177,7 +177,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 // PLEASE SET VERSION and REVISION HERE
 
-#define Version_Major_Minor_Revision F("Ver.#0.0.393")
+#define Version_Major_Minor_Revision F("Ver.#0.0.396")
 
 //////////////////////////////////////////////////////////////////////////////////
 // PLEASE SET MODULE NAME e.g. Main Consumers, Bow Thruster, Inverter, Watermaker ( name can be max 18 symbols)
@@ -406,6 +406,18 @@ void setup()
 }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Memory helper
+
+uint32_t MEMORY_LAST_EXECUTE;
+#define MEMORY_TIMEOUT  10000
+
+inline int16_t VMM_FREE() 
+{
+  extern int16_t __heap_start, *__brkval; 
+  int v; 
+  return (int16_t) &v - (__brkval == 0 ? (int16_t) &__heap_start : (int16_t) __brkval); 
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Foreground main loop/process and communcation
@@ -417,6 +429,15 @@ void loop()
   {
     MONITOR_LAST_EXECUTE = millis();
     MONITOR_DOWN();
+  }
+
+  if (DO_EXECUTE(millis(), MEMORY_LAST_EXECUTE, MEMORY_TIMEOUT))
+  {
+    MEMORY_LAST_EXECUTE = millis();
+    LOG64_SET(F("MEMORY: FREE["));
+    LOG64_SET(VMM_FREE());
+    LOG64_SET(F("]"));
+    LOG64_NEW_LINE;
   }
 
 

@@ -37,9 +37,10 @@ RH_NRF24 RF_DRIVER;
 
 #define RF_BROADCAST_ADDRESS RH_BROADCAST_ADDRESS
 #define RF_BROADCAST_HARD_RETRANSMIT_COUNT 5
+#define RH_RELIABLE_TIMEOUT 100
 #define RH_RETRANSMIT_COUNT 2
 #define RF_HARD_RETRANSMIT_COUNT 2
-#define RF_HARD_RETRANSMIT_DELAY 5
+#define RF_HARD_RETRANSMIT_DELAY 10
 
 #if not defined(RF_NETWORK_SIMULATION)
 #if defined(MODULE_IS_SERVER)
@@ -50,12 +51,12 @@ RHReliableDatagram RF_MANAGER = RHReliableDatagram(RF_DRIVER, MODULE_HANDSHAKE_D
 #endif
 #endif
 
-# define RF_MAX_MESSAGE_LEN RH_NRF24_MAX_MESSAGE_LEN
+#define RF_MAX_MESSAGE_LEN RH_NRF24_MAX_MESSAGE_LEN
 #endif
 
 #if defined(RF_NETWORK_SIMULATION)
 #define RF_BROADCAST_ADDRESS 255
-# define RF_MAX_MESSAGE_LEN 30
+#define RF_MAX_MESSAGE_LEN 30
 uint8_t RF_SIMULATION_BUF[RF_MAX_MESSAGE_LEN];
 uint8_t RF_SIMULATION_SIZE;
 uint8_t RF_SIMULATION_BUF_SLAVE[RF_MAX_MESSAGE_LEN];
@@ -95,6 +96,7 @@ inline void RF_INIT()
   }
 
   RF_MANAGER.setRetries(RH_RETRANSMIT_COUNT);
+  RF_MANAGER.setTimeout(RH_RELIABLE_TIMEOUT);
   if (!RF_MANAGER.init())
   {
     LOG64_SET(F("RF: INIT RadioHead FAILED!"));
@@ -508,11 +510,15 @@ inline void RF_PROCESS(OPER_PACKET  & oper_packet, uint8_t oper)
 
 #if defined(MODULE_SLAVE_ENABLED)
         ID_GET_HANDSHAKE_PACKET(out_buf, out_size, 1);
+
+        delay(RF_HARD_RETRANSMIT_DELAY);
         RF_SEND_DATA(out_buf, out_size, 0);
 #endif
 
 #if defined(MODULE_SLAVE_SLAVE_ENABLED)
         ID_GET_HANDSHAKE_PACKET(out_buf, out_size, 2);
+
+        delay(RF_HARD_RETRANSMIT_DELAY);
         RF_SEND_DATA(out_buf, out_size, 0);
 #endif
       }; return;
@@ -613,11 +619,15 @@ inline void RF_PROCESS(OPER_PACKET  & oper_packet, uint8_t oper)
 
 #if defined(MODULE_SLAVE_ENABLED)
         ID_GET_DATA_PACKET(out_buf, out_size, amps_slave, volts_slave, ah_slave, ID_SLAVE_ID);
+
+        delay(RF_HARD_RETRANSMIT_DELAY);
         RF_SEND_DATA(out_buf, out_size, 0);
 #endif
 
 #if defined(MODULE_SLAVE_SLAVE_ENABLED)
         ID_GET_DATA_PACKET(out_buf, out_size, amps_slave_slave, volts_slave_slave, ah_slave_slave, ID_SLAVE_SLAVE_ID);
+
+        delay(RF_HARD_RETRANSMIT_DELAY);
         RF_SEND_DATA(out_buf, out_size, 0);
 #endif
 
