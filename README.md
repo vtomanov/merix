@@ -1,4 +1,7 @@
 # merix
+
+https://www.youtube.com/watch?v=_Ukt8E8NHLA&t=31s
+
 Advance battery monitoring system for boats , RV etc. 
 
 
