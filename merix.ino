@@ -177,7 +177,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 // PLEASE SET VERSION and REVISION HERE
 
-#define Version_Major_Minor_Revision F("Ver.#0.0.396")
+#define Version_Major_Minor_Revision F("Ver.#0.0.398")
 
 //////////////////////////////////////////////////////////////////////////////////
 // PLEASE SET MODULE NAME e.g. Main Consumers, Bow Thruster, Inverter, Watermaker ( name can be max 18 symbols)
@@ -352,8 +352,6 @@ inline void MONITOR_DOWN()
 #include "merix_server_reset.h"
 #include "merix_server_button.h"
 
-
-
 void setup()
 {
   // Serial Log
@@ -402,9 +400,7 @@ void setup()
 
   // RF
   RF_INIT();
-
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Memory helper
