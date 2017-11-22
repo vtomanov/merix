@@ -4,13 +4,13 @@
    -- 1x Arduino Uno
    -- 1x Arduino Mega
    
-2. Connect the base mosules and teh nrf24's together
-3. Connect one of the builde to arduino Uno and one of teh bundles to Arduino Mega
+2. Connect the base modules and the nrf24's together
+3. Connect one of the bundles to arduino Uno and one of teh bundles to Arduino Mega
 
 for Arduino Uno the pins are :
 
 GND  - GND
-VCC  - 5V ( Again make sure yiu are connecting the base module NOT the NRF24 directly - the NRF is 3.3v )
+VCC  - 5V ( Again make sure you are connecting the base module NOT the NRF24 directly - the NRF is 3.3v )
 CE   - 8
 CSN  - 10
 SCK  - 13
@@ -21,14 +21,66 @@ MISO - 12
 for Arduino Mega the pins are :
 
 GND  - GND
-VCC  - 5V ( Again make sure yiu are connecting the base module NOT the NRF24 directly - the NRF is 3.3v )
+VCC  - 5V ( Again make sure you are connecting the base module NOT the NRF24 directly - the NRF is 3.3v )
 CE   - 8
 CSN  - 53
 SCK  - 52
 MOSI - 51
 MISO - 50
 
-3. edit the following files
+3. Edit the following files
 
+  -- file: merix_client_ampermeter.h uncomment line: 
 
+#define CLIENT_AMPERMETER_SIMULATION
+
+ -- file: merix_client_voltmeter.h uncomment line: 
+
+#define CLIENT_VOLTMETER_SIMULATION
+
+  -- file: merix_server_display.h uncomment line : 
+
+#define SERVER_DISPLAY_SIMULATION
+
+-- file : merix_rf.h COMMENT OUT! line : 
+
+#define RF_NETWORK_SIMULATION
+
+-- file: merix_rf.h UNCOMMENT! line : 
+
+#define RF_RADIO_HEAD
+
+4. Copy the whole folder merix in new place , rename it to merix_client
+5. Rename the file inside merix.ino to merix_client.ino
+
+6. Edit the files :
+
+server:
+
+-- file : merix/merix.ino COMMENT OUT! line:
+
+#define MODULE_IS_CLIENT 
+
+-- file : merix/merix.ino UN COMMENT! line:
+
+#define MODULE_IS_SERVER
+
+client :
+-- file : merix_client/merix_client.ino UNCOMMENT! line:
+
+#define MODULE_IS_CLIENT 
+
+-- file : merix_client/merix_client.ino COMMENT OUT! line:
+
+#define MODULE_IS_SERVER
+
+7. Open in two separate arduino IDE's - merix/merix.ino and  merix_client/merix_client.ino
+8. Connect one Arduino Mega and one Arduino Uno to the same computer on different USB's
+9. Make sure you connect them one by one and find out in the Arduino IDE's which one to which port is connected
+10. Set one of the Arduino IDE's to target Arduino Mega - choose the Arduino Mega Potr for it
+11. Set the other to target Arduino Uno and set the Arduino Uno Port to it
+12. Open a Serial monitors on both the Arduino IDE's
+13. Compile the Arduino Uno IDE and upload the sketch to the Arduino Uno
+14. Compile the Arduino Uno IDE and upload the sketch to the Arduino Uno
+15. You should be able now to see the communication going and the system working
 
