@@ -1,0 +1,48 @@
+1.  Install the required libraries to the Arduino IDE
+
+- Downaod the following Libraries:
+ -- NewliquidCrystal
+ -- Log64 ( https://github.com/vtomanov/Log64 )
+ -- Radiohead ( http://www.airspayce.com/mikem/arduino/RadioHead/index.html )
+
+- Copy the libraries in the Arduino IDE 
+( e.g. on windows in the folder : C:\Program Files (x86)\Arduino\libraries you should have folders: NewliquidCrystal,  Log64,  RadioHead with the source code of the libraries inside )
+ 
+- Download the source code for MERIX ( https://github.com/vtomanov/merix ) and copy in directory "merix" somewhere on your computer
+- Fix the RadioHead library - in the folder   C:\Program Files (x86)\Arduino\libraries\RadioHead - override the file RH_NRF24.cpp with the one from : (https://github.com/vtomanov/merix/tree/master/radiohead )
+
+2. Try full simulation 
+
+- Open merix.ino inside Arduino
+- Connect Arduino Mega to the computer
+- Edit the following file :
+
+  -- file : merix.h uncomment both lines :
+
+#define MODULE_IS_CLIENT 
+
+#define MODULE_IS_SERVER
+
+  -- file: merix_client_ampermeter.h uncomment line: 
+
+#define CLIENT_AMPERMETER_SIMULATION
+
+ -- file: merix_client_voltmeter.h uncomment line: 
+
+#define CLIENT_VOLTMETER_SIMULATION
+
+  -- file: merix_server_display.h uncomment line : 
+
+#define SERVER_DISPLAY_SIMULATION
+
+-- file : merix_rf.h uncomment line : 
+
+#define RF_NETWORK_SIMULATION
+
+-- file: merix_rf.h COMMENT OUT! line : 
+
+#define RF_RADIO_HEAD
+
+- Open the Serial Monitor, Compile for arduino Mega and upload the scetch 
+
+- All will be displayed in the serial screen - simulation will have one client ("HOUSE CONSUMERS") which measure - volts, amps and consumption
