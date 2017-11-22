@@ -43,6 +43,6 @@
 
 #define RF_RADIO_HEAD
 
-- Open the Serial Monitor, Compile for arduino Mega and upload the scetch 
+- Open the Serial Monitor, Compile for arduino Mega and upload the sketch 
 
 - All will be displayed in the serial screen - simulation will have one client ("HOUSE CONSUMERS") which measure - volts, amps and consumption
