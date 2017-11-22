@@ -30,7 +30,7 @@
 #if defined(MODULE_IS_SERVER)
 
 // use his is you wnat to simulate the display 20x4 in the log
-//#define SERVER_DISPLAY_SIMULATION
+#define SERVER_DISPLAY_SIMULATION
 
 #if defined(SERVER_DISPLAY_SIMULATION)
 char SERVER_DISPLAY_SIMULATION_CACHE[4][21];
@@ -252,12 +252,16 @@ inline void SERVER_DISPLAY_TOGLE_BACKLIGHT()
   if (SERVER_DISPLAY_BACKLIGHT_ON)
   {
     SERVER_DISPLAY_BACKLIGHT_ON = false;
+#if not defined(SERVER_DISPLAY_SIMULATION)
     lcd.noBacklight();
+#endif   
   }
   else
   {
     SERVER_DISPLAY_BACKLIGHT_ON = true;
+#if not defined(SERVER_DISPLAY_SIMULATION)
     lcd.backlight();
+#endif    
   }
 }
 
