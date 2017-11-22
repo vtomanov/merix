@@ -1,0 +1,34 @@
+1. Make sure that you have:
+   -- 2x "Base module with voltage regulator"
+   -- 2x "nRF24L01 Module With added Transmit Power Amplifier, Low Noise Receiver Preamplifier, External Antenna"
+   -- 1x Arduino Uno
+   -- 1x Arduino Mega
+   
+2. Connect the base mosules and teh nrf24's together
+3. Connect one of the builde to arduino Uno and one of teh bundles to Arduino Mega
+
+for Arduino Uno the pins are :
+
+GND  - GND
+VCC  - 5V ( Again make sure yiu are connecting the base module NOT the NRF24 directly - the NRF is 3.3v )
+CE   - 8
+CSN  - 10
+SCK  - 13
+MOSI - 11
+MISO - 12
+
+
+for Arduino Mega the pins are :
+
+GND  - GND
+VCC  - 5V ( Again make sure yiu are connecting the base module NOT the NRF24 directly - the NRF is 3.3v )
+CE   - 8
+CSN  - 53
+SCK  - 52
+MOSI - 51
+MISO - 50
+
+3. edit the following files
+
+
+
