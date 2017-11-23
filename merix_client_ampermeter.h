@@ -19,6 +19,8 @@
 // use this to simulate ampremeter readings
 //#define CLIENT_AMPERMETER_SIMULATION
 
+#define CLIENT_AMPERMETER_MV_PER_AMP 0.04f
+
 #define CLIENT_AMPERMETER_TIMEOUT  10
 uint32_t CLIENT_AMPERMETER_LAST_EXECUTE;
 
@@ -57,11 +59,7 @@ inline void CLIENT_AMPERMETER_KALMAN(float & x, float & p, float & q, float & r,
 }
 
 
-#define CLIENT_AMPERMETER_COEF 0.07424f //=0.0049/0.066V/A - 66mV/A as per datasheet 
-#define CLIENT_AMPERMETER_SUB 37.8787f  //=2.5/0.066V/A - 66mV/A as per datasheet 
-// (coef * a) - sub
-//  5 / 1023 / 0.66 * a  - 2.5 / 0.066
-// 0.66  * ( 5 / 1023 * a - 2.5)
+
 inline float  CLIENT_AMPERMETER_CALC(uint16_t from_sensor)
 {
 
@@ -72,7 +70,7 @@ inline float  CLIENT_AMPERMETER_CALC(uint16_t from_sensor)
                            CLIENT_AMPERMETER_KALMAN_R,
                            from_sensor);
 
-  return ( CLIENT_AMPERMETER_COEF * ((float)from_sensor) ) - CLIENT_AMPERMETER_SUB;
+  retun ((((float)from_sensor) - 512.0f) * 5.0f / 1024.0f / CLIENT_AMPERMETER_MV_PER_AMP - CLIENT_AMPERMETER_MV_PER_AMP);
 }
 
 

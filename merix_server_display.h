@@ -30,7 +30,7 @@
 #if defined(MODULE_IS_SERVER)
 
 // use his is you wnat to simulate the display 20x4 in the log
-#define SERVER_DISPLAY_SIMULATION
+//#define SERVER_DISPLAY_SIMULATION
 
 #if defined(SERVER_DISPLAY_SIMULATION)
 char SERVER_DISPLAY_SIMULATION_CACHE[4][21];
